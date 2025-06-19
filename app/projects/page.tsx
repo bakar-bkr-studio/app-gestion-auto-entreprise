@@ -62,17 +62,27 @@ const statusColors: Record<Status, string> = {
 
 export default function ProjectsPage() {
   const [filter, setFilter] = useState<Status | 'Tous'>('Tous');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<'date' | 'budget'>('date');
 
   const handleEdit = (id: number) => {
     console.log('edit', id);
   };
 
   const handleDelete = (id: number) => {
-    console.log('delete', id);
+    if (confirm('Supprimer ce projet ?')) {
+      console.log('delete', id);
+    }
   };
 
-  const filtered =
-    filter === 'Tous' ? sampleProjects : sampleProjects.filter((p) => p.status === filter);
+  const filtered = sampleProjects
+    .filter((p) => (filter === 'Tous' ? true : p.status === filter))
+    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) =>
+      sort === 'date'
+        ? new Date(a.date).getTime() - new Date(b.date).getTime()
+        : a.budget - b.budget
+    );
 
   return (
     <div>
@@ -85,11 +95,30 @@ export default function ProjectsPage() {
           + Ajouter un projet
         </Link>
       </div>
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input
+          aria-label="Rechercher"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded border px-3 py-1"
+          placeholder="Rechercher..."
+        />
+        <select
+          aria-label="Trier"
+          value={sort}
+          onChange={(e) => setSort(e.target.value as 'date' | 'budget')}
+          className="rounded border px-3 py-1"
+        >
+          <option value="date">Par date</option>
+          <option value="budget">Par budget</option>
+        </select>
+      </div>
 
       <div className="my-6 flex space-x-2 overflow-x-auto">
         {['Conception', 'Tournage', 'Montage', 'Prêt', 'Envoyé', 'Terminé'].map((s) => (
           <button
             key={s}
+            aria-label={s}
             onClick={() => setFilter(s as Status)}
             className={`whitespace-nowrap rounded px-3 py-1 text-sm font-medium shadow ${
               filter === s ? statusColors[s as Status] : 'bg-white text-gray-600'
@@ -99,6 +128,7 @@ export default function ProjectsPage() {
           </button>
         ))}
         <button
+          aria-label="Tous"
           onClick={() => setFilter('Tous')}
           className={`whitespace-nowrap rounded px-3 py-1 text-sm font-medium shadow ${
             filter === 'Tous' ? 'bg-gray-800 text-white' : 'bg-white text-gray-600'
