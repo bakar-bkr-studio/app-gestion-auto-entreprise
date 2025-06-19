@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-const NewProjectPage: React.FC = () => {
+export default function NewProjectPage() {
   const [name, setName] = useState('');
   const [client, setClient] = useState('');
   const [description, setDescription] = useState('');
@@ -10,18 +12,20 @@ const NewProjectPage: React.FC = () => {
   const [type, setType] = useState('Photo');
   const [budget, setBudget] = useState(0);
 
+  const router = useRouter();
+
   const handleCreateProject = () => {
     console.log({ name, client, description, startDate, dueDate, status, type, budget });
   };
 
   const handleCancel = () => {
-    window.location.href = '/projects';
+    router.push('/projects');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div>
       <h1 className="mb-6 text-3xl font-bold">Nouveau projet</h1>
-      <div className="space-y-4 max-w-xl">
+      <div className="max-w-xl space-y-4">
         <div>
           <label className="mb-1 block font-semibold">Nom du projet</label>
           <input
@@ -32,15 +36,11 @@ const NewProjectPage: React.FC = () => {
         </div>
         <div>
           <label className="mb-1 block font-semibold">Client</label>
-          <select
+          <input
             className="w-full rounded border px-3 py-2"
             value={client}
             onChange={(e) => setClient(e.target.value)}
-          >
-            <option value="">-- Choisir --</option>
-            <option value="Client A">Client A</option>
-            <option value="Client B">Client B</option>
-          </select>
+          />
         </div>
         <div>
           <label className="mb-1 block font-semibold">Description</label>
@@ -51,7 +51,7 @@ const NewProjectPage: React.FC = () => {
           />
         </div>
         <div>
-          <label className="mb-1 block font-semibold">Date de d\xE9but</label>
+          <label className="mb-1 block font-semibold">Date de début</label>
           <input
             type="date"
             className="w-full rounded border px-3 py-2"
@@ -60,7 +60,7 @@ const NewProjectPage: React.FC = () => {
           />
         </div>
         <div>
-          <label className="mb-1 block font-semibold">Date pr\xE9vue</label>
+          <label className="mb-1 block font-semibold">Date prévue</label>
           <input
             type="date"
             className="w-full rounded border px-3 py-2"
@@ -75,7 +75,7 @@ const NewProjectPage: React.FC = () => {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            {['Conception', 'Tournage', 'Montage', 'Pr\xEAt', 'Envoy\xE9', 'Termin\xE9'].map((s) => (
+            {['Conception', 'Tournage', 'Montage', 'Prêt', 'Envoyé', 'Terminé'].map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -90,11 +90,11 @@ const NewProjectPage: React.FC = () => {
             onChange={(e) => setType(e.target.value)}
           >
             <option value="Photo">Photo</option>
-            <option value="Video">Vid\xE9o</option>
+            <option value="Video">Vidéo</option>
           </select>
         </div>
         <div>
-          <label className="mb-1 block font-semibold">Budget (\u20AC)</label>
+          <label className="mb-1 block font-semibold">Budget (€)</label>
           <input
             type="number"
             className="w-full rounded border px-3 py-2"
@@ -107,7 +107,7 @@ const NewProjectPage: React.FC = () => {
             onClick={handleCreateProject}
             className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
           >
-            ✅ Cr\xE9er le projet
+            ✅ Créer le projet
           </button>
           <button
             onClick={handleCancel}
@@ -119,6 +119,4 @@ const NewProjectPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default NewProjectPage;
+}
