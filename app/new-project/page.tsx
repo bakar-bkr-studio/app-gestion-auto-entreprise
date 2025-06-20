@@ -1,8 +1,8 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
-import { useProjects } from '../../components/ProjectsProvider';
+import { useEffect, useState } from 'react';
+import { useProjects, Task, DocumentFile, Project } from '../../components/ProjectsProvider';
 
 interface FormValues {
   name: string;
@@ -13,6 +13,7 @@ interface FormValues {
   status: string;
   type: string;
   budget: number;
+  notes: string;
 }
 
 export default function NewProjectPage() {
@@ -21,6 +22,10 @@ export default function NewProjectPage() {
   const { projects, addProject, updateProject } = useProjects();
   const editId = searchParams.get('id');
   const project = editId ? projects.find((p) => p.id === Number(editId)) : undefined;
+  const [tasks, setTasks] = useState<Task[]>(project?.tasks ?? []);
+  const [taskText, setTaskText] = useState('');
+  const [documents, setDocuments] = useState<DocumentFile[]>(project?.documents ?? []);
+  const [manualClient, setManualClient] = useState(project ? false : true);
   const {
     register,
     handleSubmit,
@@ -37,8 +42,9 @@ export default function NewProjectPage() {
           status: project.status,
           type: 'Photo',
           budget: project.budget,
+          notes: project.notes,
         }
-      : { status: 'Conception', type: 'Photo' },
+      : { status: 'Conception', type: 'Photo', notes: '' },
   });
 
   useEffect(() => {
@@ -52,9 +58,22 @@ export default function NewProjectPage() {
         status: project.status,
         type: 'Photo',
         budget: project.budget,
+        notes: project.notes,
       });
+      setTasks(project.tasks);
+      setDocuments(project.documents);
+      setManualClient(false);
     }
   }, [project, reset]);
+
+  const addTask = () => {
+    if (!taskText.trim()) return;
+    setTasks([...tasks, { id: Date.now(), text: taskText, completed: false }]);
+    setTaskText('');
+  };
+  const removeTask = (id: number) => {
+    setTasks(tasks.filter((t) => t.id !== id));
+  };
 
   const onSubmit = (data: FormValues) => {
     const payload = {
@@ -65,6 +84,9 @@ export default function NewProjectPage() {
       endDate: data.dueDate,
       status: data.status as any,
       budget: data.budget,
+      tasks,
+      notes: data.notes,
+      documents,
     };
     if (editId) {
       updateProject(Number(editId), payload);
@@ -94,12 +116,29 @@ export default function NewProjectPage() {
           </div>
           <div>
             <label className="mb-1 block font-semibold">Client</label>
-            <select {...register('client', { required: true })} className="w-full rounded border px-3 py-2">
-              <option value="">-- Sélectionner --</option>
-              <option value="Client A">Client A</option>
-              <option value="Client B">Client B</option>
-            </select>
+            {manualClient ? (
+              <input
+                {...register('client', { required: true })}
+                placeholder="Nom du client"
+                className="w-full rounded border px-3 py-2"
+              />
+            ) : (
+              <select {...register('client', { required: true })} className="w-full rounded border px-3 py-2">
+                <option value="">-- Sélectionner --</option>
+                <option value="Client A">Client A</option>
+                <option value="Client B">Client B</option>
+              </select>
+            )}
             {errors.client && <p className="text-sm text-red-600">Ce champ est requis</p>}
+            {!manualClient && (
+              <button
+                type="button"
+                onClick={() => setManualClient(true)}
+                className="mt-1 text-sm text-blue-600"
+              >
+                ➕ Ajouter un client manuellement
+              </button>
+            )}
           </div>
           <div>
             <label className="mb-1 block font-semibold">Description</label>
@@ -143,6 +182,47 @@ export default function NewProjectPage() {
               <input type="number" {...register('budget', { valueAsNumber: true })} className="w-full rounded border px-3 py-2" />
             </div>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Tâches du projet</h2>
+          {tasks.map((t) => (
+            <div key={t.id} className="flex items-center justify-between">
+              <span>{t.text}</span>
+              <button type="button" onClick={() => removeTask(t.id)} className="text-red-500">🗑️</button>
+            </div>
+          ))}
+          <div className="flex space-x-2">
+            <input
+              value={taskText}
+              onChange={(e) => setTaskText(e.target.value)}
+              className="flex-1 rounded border px-3 py-2"
+            />
+            <button type="button" onClick={addTask} className="rounded bg-blue-500 px-3 text-white">
+              ➕
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Notes personnelles</h2>
+          <textarea {...register('notes')} className="w-full rounded border px-3 py-2" />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Documents liés</h2>
+          <ul className="space-y-1">
+            {documents.map((d) => (
+              <li key={d.id} className="flex items-center justify-between">
+                <span>{d.name}</span>
+                <button type="button" onClick={() => setDocuments(documents.filter(doc => doc.id !== d.id))} className="text-red-500">🗑️</button>
+              </li>
+            ))}
+          </ul>
+          <input type="file" onChange={(e) => {
+            const f = e.target.files ? e.target.files[0] : null;
+            if (f) setDocuments([...documents, { id: Date.now(), name: f.name, path: f.name }]);
+          }} />
         </div>
 
         <div className="flex justify-end space-x-2">

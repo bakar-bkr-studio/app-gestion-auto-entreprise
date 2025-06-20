@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import ProjectCard from '../../components/ProjectCard';
 import DeleteModal from '../../components/DeleteModal';
 import Toast from '../../components/Toast';
-import { useProjects, Status } from '../../components/ProjectsProvider';
+import ProjectModal from '../../components/ProjectModal';
+import { useProjects, Status, Project } from '../../components/ProjectsProvider';
 
 const statusColors: Record<Status, string> = {
   Conception: 'bg-yellow-200 text-yellow-700',
@@ -25,6 +26,7 @@ export default function ProjectsPage() {
   const [sort, setSort] = useState<'startDate' | 'budget'>('startDate');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
 
   const handleEdit = (id: number) => {
     router.push(`/new-project?id=${id}`);
@@ -42,6 +44,12 @@ export default function ProjectsPage() {
     }
   };
 
+  const openProject = (project: Project) => {
+    setActiveProject(project);
+  };
+
+  const closeProject = () => setActiveProject(null);
+
   const filtered = projects
     .filter((p) => (filter === 'Tous' ? true : p.status === filter))
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
@@ -53,8 +61,8 @@ export default function ProjectsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Projets récents</h1>
+      <div className="mt-8 mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+        <h1 className="text-center text-4xl font-bold">Mes projets</h1>
         <Link
           href="/new-project"
           className="rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
@@ -81,7 +89,7 @@ export default function ProjectsPage() {
         </select>
       </div>
 
-      <div className="my-6 flex space-x-2 overflow-x-auto">
+      <div className="mt-4 mb-8 flex space-x-2 overflow-x-auto">
         {['Conception', 'Tournage', 'Montage', 'Prêt', 'Envoyé', 'Terminé'].map((s) => (
           <button
             key={s}
@@ -112,6 +120,7 @@ export default function ProjectsPage() {
             project={project}
             onEdit={() => handleEdit(project.id)}
             onDelete={() => handleDelete(project.id)}
+            onOpen={() => openProject(project)}
           />
         ))}
       </div>
@@ -122,6 +131,13 @@ export default function ProjectsPage() {
       >
         Voulez-vous vraiment supprimer ce projet ?
       </DeleteModal>
+      {activeProject && (
+        <ProjectModal
+          project={activeProject}
+          onClose={closeProject}
+          onEdit={() => handleEdit(activeProject.id)}
+        />
+      )}
       <Toast message={toast} onClose={() => setToast(null)} />
     </div>
   );
