@@ -3,6 +3,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { useProjects, Task, DocumentFile, Project } from '../../components/ProjectsProvider';
+import { initialClients } from '../../lib/data/clients';
 
 interface FormValues {
   name: string;
@@ -125,8 +126,9 @@ export default function NewProjectPage() {
             ) : (
               <select {...register('client', { required: true })} className="w-full rounded border px-3 py-2">
                 <option value="">-- Sélectionner --</option>
-                <option value="Client A">Client A</option>
-                <option value="Client B">Client B</option>
+                {initialClients.map((c) => (
+                  <option key={c.id} value={`${c.firstName} ${c.lastName}`}>{`${c.firstName} ${c.lastName}`}</option>
+                ))}
               </select>
             )}
             {errors.client && <p className="text-sm text-red-600">Ce champ est requis</p>}
