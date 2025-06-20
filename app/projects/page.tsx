@@ -1,55 +1,11 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { FaCamera } from 'react-icons/fa';
-
-interface Project {
-  id: number;
-  name: string;
-  client: string;
-  description: string;
-  date: string;
-  budget: number;
-  status: Status;
-}
-
-type Status =
-  | 'Conception'
-  | 'Tournage'
-  | 'Montage'
-  | 'Prêt'
-  | 'Envoyé'
-  | 'Terminé';
-
-const sampleProjects: Project[] = [
-  {
-    id: 1,
-    name: 'Mariage Sarah & Tom',
-    client: 'Sarah Martin',
-    description: 'Couverture photo et vidéo du mariage',
-    date: '2024-06-15',
-    budget: 1500,
-    status: 'Tournage',
-  },
-  {
-    id: 2,
-    name: "Clip promo Maison d'hôtes",
-    client: 'Le Beau Gîte',
-    description: "Réalisation d'une vidéo publicitaire",
-    date: '2024-05-01',
-    budget: 2000,
-    status: 'Montage',
-  },
-  {
-    id: 3,
-    name: 'Shooting produits Printemps',
-    client: 'Mode & Chic',
-    description: 'Photos catalogue printemps',
-    date: '2024-04-20',
-    budget: 800,
-    status: 'Conception',
-  },
-];
+import { useRouter } from 'next/navigation';
+import ProjectCard from '../../components/ProjectCard';
+import DeleteModal from '../../components/DeleteModal';
+import Toast from '../../components/Toast';
+import { useProjects, Status } from '../../components/ProjectsProvider';
 
 const statusColors: Record<Status, string> = {
   Conception: 'bg-yellow-200 text-yellow-700',
@@ -60,27 +16,38 @@ const statusColors: Record<Status, string> = {
   Terminé: 'bg-gray-500 text-white',
 };
 
+
 export default function ProjectsPage() {
+  const router = useRouter();
+  const { projects, deleteProject } = useProjects();
   const [filter, setFilter] = useState<Status | 'Tous'>('Tous');
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'date' | 'budget'>('date');
+  const [sort, setSort] = useState<'startDate' | 'budget'>('startDate');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const handleEdit = (id: number) => {
-    console.log('edit', id);
+    router.push(`/new-project?id=${id}`);
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Supprimer ce projet ?')) {
-      console.log('delete', id);
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteId !== null) {
+      deleteProject(deleteId);
+      setDeleteId(null);
+      setToast('Le projet a bien été supprimé ✅');
     }
   };
 
-  const filtered = sampleProjects
+  const filtered = projects
     .filter((p) => (filter === 'Tous' ? true : p.status === filter))
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) =>
-      sort === 'date'
-        ? new Date(a.date).getTime() - new Date(b.date).getTime()
+      sort === 'startDate'
+        ? new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
         : a.budget - b.budget
     );
 
@@ -106,10 +73,10 @@ export default function ProjectsPage() {
         <select
           aria-label="Trier"
           value={sort}
-          onChange={(e) => setSort(e.target.value as 'date' | 'budget')}
+          onChange={(e) => setSort(e.target.value as 'startDate' | 'budget')}
           className="rounded border px-3 py-1"
         >
-          <option value="date">Par date</option>
+          <option value="startDate">Par date</option>
           <option value="budget">Par budget</option>
         </select>
       </div>
@@ -138,51 +105,24 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((project) => (
-          <div key={project.id} className="rounded-lg bg-white p-4 shadow hover:shadow-md">
-            <div className="flex items-center space-x-2">
-              <FaCamera className="text-xl text-gray-500" />
-              <h2 className="text-lg font-semibold">{project.name}</h2>
-            </div>
-            <p className="text-sm text-gray-600">Client : {project.client}</p>
-            <p className="mt-2 text-sm text-gray-700">{project.description}</p>
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="flex items-center space-x-1 text-gray-600">
-                <span role="img" aria-label="date">
-                  📅
-                </span>
-                <span>{project.date}</span>
-              </span>
-              <span className="flex items-center space-x-1 text-green-600">
-                <span role="img" aria-label="budget">
-                  💶
-                </span>
-                <span>{project.budget}</span>
-              </span>
-            </div>
-            <span
-              className={`mt-2 inline-block rounded px-2 py-1 text-xs font-semibold ${statusColors[project.status]}`}
-            >
-              {project.status}
-            </span>
-            <div className="mt-4 flex space-x-2">
-              <button
-                onClick={() => handleEdit(project.id)}
-                className="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
-              >
-                ✏️ Modifier
-              </button>
-              <button
-                onClick={() => handleDelete(project.id)}
-                className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
-              >
-                🗑️ Supprimer
-              </button>
-            </div>
-          </div>
+          <ProjectCard
+            key={project.id}
+            project={project}
+            onEdit={() => handleEdit(project.id)}
+            onDelete={() => handleDelete(project.id)}
+          />
         ))}
       </div>
+      <DeleteModal
+        isOpen={deleteId !== null}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+      >
+        Voulez-vous vraiment supprimer ce projet ?
+      </DeleteModal>
+      <Toast message={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
