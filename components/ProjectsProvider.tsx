@@ -9,6 +9,18 @@ export type Status =
   | 'Envoyé'
   | 'Terminé';
 
+export interface Task {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+export interface DocumentFile {
+  id: number;
+  name: string;
+  path: string;
+}
+
 export interface Project {
   id: number;
   name: string;
@@ -18,6 +30,9 @@ export interface Project {
   endDate: string;
   budget: number;
   status: Status;
+  tasks: Task[];
+  notes: string;
+  documents: DocumentFile[];
 }
 
 type ProjectsContextType = {
@@ -39,6 +54,9 @@ const initialProjects: Project[] = [
     endDate: '2024-06-15',
     budget: 1500,
     status: 'Tournage',
+    tasks: [],
+    notes: '',
+    documents: [],
   },
   {
     id: 2,
@@ -49,6 +67,9 @@ const initialProjects: Project[] = [
     endDate: '2024-05-02',
     budget: 2000,
     status: 'Montage',
+    tasks: [],
+    notes: '',
+    documents: [],
   },
   {
     id: 3,
@@ -59,6 +80,9 @@ const initialProjects: Project[] = [
     endDate: '2024-04-22',
     budget: 800,
     status: 'Conception',
+    tasks: [],
+    notes: '',
+    documents: [],
   },
 ];
 
