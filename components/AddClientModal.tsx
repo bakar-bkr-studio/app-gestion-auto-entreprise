@@ -1,5 +1,7 @@
 'use client';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Client } from '../lib/data/clients';
 import { X } from 'lucide-react';
 
@@ -9,19 +11,22 @@ interface AddClientModalProps {
   onClose: () => void;
 }
 
-interface FormValues {
-  firstName: string;
-  lastName: string;
-  company?: string;
-  email: string;
-  phone: string;
-  address: string;
-  status: 'Client' | 'Prospect';
-  tags: string;
-}
+const schema = z.object({
+  firstName: z.string().min(1, 'Ce champ est requis'),
+  lastName: z.string().min(1, 'Ce champ est requis'),
+  company: z.string().optional(),
+  email: z.string().email('Email invalide'),
+  phone: z.string().min(1, 'Ce champ est requis'),
+  address: z.string().optional(),
+  status: z.enum(['Client', 'Prospect']),
+  tags: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function AddClientModal({ isOpen, onAdd, onClose }: AddClientModalProps) {
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: { status: 'Client' }
   });
 
@@ -57,13 +62,13 @@ export default function AddClientModal({ isOpen, onAdd, onClose }: AddClientModa
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">Prénom</label>
-            <input className="w-full rounded border px-3 py-2" {...register('firstName', { required: true })} />
-            {errors.firstName && <p className="text-sm text-red-600">Ce champ est requis</p>}
+            <input className="w-full rounded border px-3 py-2" {...register('firstName')} />
+            {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Nom</label>
-            <input className="w-full rounded border px-3 py-2" {...register('lastName', { required: true })} />
-            {errors.lastName && <p className="text-sm text-red-600">Ce champ est requis</p>}
+            <input className="w-full rounded border px-3 py-2" {...register('lastName')} />
+            {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Entreprise</label>
@@ -71,13 +76,13 @@ export default function AddClientModal({ isOpen, onAdd, onClose }: AddClientModa
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Adresse email</label>
-            <input type="email" className="w-full rounded border px-3 py-2" {...register('email', { required: true })} />
-            {errors.email && <p className="text-sm text-red-600">Ce champ est requis</p>}
+            <input type="email" className="w-full rounded border px-3 py-2" {...register('email')} />
+            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Téléphone</label>
-            <input className="w-full rounded border px-3 py-2" {...register('phone', { required: true })} />
-            {errors.phone && <p className="text-sm text-red-600">Ce champ est requis</p>}
+            <input className="w-full rounded border px-3 py-2" {...register('phone')} />
+            {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Adresse postale</label>

@@ -46,16 +46,16 @@ export default function ProjectList() {
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   const sorted = [...filtered].sort((a, b) => {
-    if (sort === 'favoris') {
-      return Number(b.isFavorite) - Number(a.isFavorite);
-    }
+    const favDiff = Number(b.isFavorite) - Number(a.isFavorite);
+    if (favDiff !== 0) return favDiff;
+    if (sort === 'favoris') return 0;
     if (sort === 'budget-asc') return a.budget - b.budget;
     if (sort === 'budget-desc') return b.budget - a.budget;
     if (sort === 'date-asc') return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
     return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   });
 
-  const ordered = [...sorted].sort((a, b) => Number(b.isFavorite) - Number(a.isFavorite));
+  const ordered = sorted;
 
   const renderCards = (list: Project[]) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
