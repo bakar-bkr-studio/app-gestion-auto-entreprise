@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { useProjects, Task, DocumentFile, Project } from '../../components/ProjectsProvider';
-import { initialClients } from '../../lib/data/clients';
+import { Client, initialClients } from '../../lib/data/clients';
 
 interface FormValues {
   name: string;
@@ -28,6 +28,19 @@ export default function NewProjectPage() {
   const [taskText, setTaskText] = useState('');
   const [documents, setDocuments] = useState<DocumentFile[]>(project?.documents ?? []);
   const [manualClient, setManualClient] = useState(project ? false : true);
+  const [clients, setClients] = useState<Client[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('clients');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Client[];
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return initialClients;
+  });
   const {
     register,
     handleSubmit,
@@ -137,7 +150,7 @@ export default function NewProjectPage() {
             ) : (
               <select {...register('client', { required: true })} className="w-full rounded border px-3 py-2">
                 <option value="">-- Sélectionner --</option>
-                {initialClients.map((c) => (
+                {clients.map((c) => (
                   <option key={c.id} value={`${c.firstName} ${c.lastName}`}>{`${c.firstName} ${c.lastName}`}</option>
                 ))}
               </select>

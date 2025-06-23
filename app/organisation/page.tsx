@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjects } from '../../components/ProjectsProvider';
 import Toast from '../../components/Toast';
 import { Plus, X, Pencil, Trash2 } from 'lucide-react';
@@ -26,8 +26,32 @@ interface Note {
 
 export default function OrganisationPage() {
   const { projects } = useProjects();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('tasks');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Task[];
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return [];
+  });
+  const [notes, setNotes] = useState<Note[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('notes');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Note[];
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return [];
+  });
   const [taskFilter, setTaskFilter] = useState<'En cours' | 'Terminées' | 'Toutes'>('En cours');
   const [projectFilter, setProjectFilter] = useState<string>('Tous');
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -35,6 +59,18 @@ export default function OrganisationPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [noteSearch, setNoteSearch] = useState('');
   const [noteFilter, setNoteFilter] = useState('Toutes');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+  }, [tasks]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('notes', JSON.stringify(notes));
+    }
+  }, [notes]);
 
   const addTask = (task: Omit<Task, 'id' | 'createdAt' | 'status'>) => {
     const id = Date.now();

@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Status =
   | 'Conception'
@@ -104,7 +104,25 @@ const initialProjects: Project[] = [
 ];
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('projects');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Project[];
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return initialProjects;
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('projects', JSON.stringify(projects));
+    }
+  }, [projects]);
 
   const addProject = (project: Omit<Project, 'id'>) => {
     const id = projects.length ? Math.max(...projects.map((p) => p.id)) + 1 : 1;

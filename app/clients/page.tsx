@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddClientModal from '../../components/AddClientModal';
 import ClientCard from '../../components/ClientCard';
 import Toast from '../../components/Toast';
@@ -9,11 +9,29 @@ import { Plus } from 'lucide-react';
 const filterTags = ['Tous', 'Prospect', 'Client', 'mariage', 'client-fidele', 'e-commerce', 'corporate', 'startup'];
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [clients, setClients] = useState<Client[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('clients');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as Client[];
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return initialClients;
+  });
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Tous');
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('clients', JSON.stringify(clients));
+    }
+  }, [clients]);
 
   const addClient = (client: Client) => {
     setClients([...clients, client]);
