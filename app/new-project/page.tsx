@@ -13,6 +13,7 @@ interface FormValues {
   dueDate: string;
   status: string;
   type: string;
+  paymentStatus: 'Payé' | 'Acompte' | 'Non payé';
   budget: number;
   notes: string;
 }
@@ -41,11 +42,17 @@ export default function NewProjectPage() {
           startDate: project.startDate,
           dueDate: project.endDate,
           status: project.status,
-          type: 'Photo',
+          type: project.type,
+          paymentStatus: project.paymentStatus,
           budget: project.budget,
           notes: project.notes,
         }
-      : { status: 'Conception', type: 'Photo', notes: '' },
+      : {
+          status: 'Conception',
+          type: 'Photo',
+          paymentStatus: 'Non payé',
+          notes: '',
+        },
   });
 
   useEffect(() => {
@@ -57,7 +64,8 @@ export default function NewProjectPage() {
         startDate: project.startDate,
         dueDate: project.endDate,
         status: project.status,
-        type: 'Photo',
+        type: project.type,
+        paymentStatus: project.paymentStatus,
         budget: project.budget,
         notes: project.notes,
       });
@@ -84,6 +92,9 @@ export default function NewProjectPage() {
       startDate: data.startDate,
       endDate: data.dueDate,
       status: data.status as any,
+      type: data.type as any,
+      paymentStatus: data.paymentStatus,
+      isFavorite: project?.isFavorite ?? false,
       budget: data.budget,
       tasks,
       notes: data.notes,
@@ -132,21 +143,28 @@ export default function NewProjectPage() {
               </select>
             )}
             {errors.client && <p className="text-sm text-red-600">Ce champ est requis</p>}
-            {!manualClient && (
-              <button
-                type="button"
-                onClick={() => setManualClient(true)}
-                className="mt-1 text-sm text-blue-600"
-              >
-                ➕ Ajouter un client manuellement
-              </button>
-            )}
-          </div>
-          <div>
-            <label className="mb-1 block font-semibold">Description</label>
-            <textarea
-              {...register('description')}
-              placeholder="Détails du projet"
+          {!manualClient && (
+            <button
+              type="button"
+              onClick={() => setManualClient(true)}
+              className="mt-1 text-sm text-blue-600"
+            >
+              ➕ Ajouter un client manuellement
+            </button>
+          )}
+        </div>
+        <div>
+          <label className="mb-1 block font-semibold">Type</label>
+          <select {...register('type')} className="w-full rounded border px-3 py-2">
+            <option value="Photo">Photo</option>
+            <option value="Video">Video</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block font-semibold">Description</label>
+          <textarea
+            {...register('description')}
+            placeholder="Détails du projet"
               className="w-full rounded border px-3 py-2"
             />
           </div>
@@ -179,12 +197,20 @@ export default function NewProjectPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="mb-1 block font-semibold">Budget (€)</label>
-              <input type="number" {...register('budget', { valueAsNumber: true })} className="w-full rounded border px-3 py-2" />
-            </div>
+          <div>
+            <label className="mb-1 block font-semibold">Budget (€)</label>
+            <input type="number" {...register('budget', { valueAsNumber: true })} className="w-full rounded border px-3 py-2" />
+          </div>
+          <div>
+            <label className="mb-1 block font-semibold">Paiement</label>
+            <select {...register('paymentStatus')} className="w-full rounded border px-3 py-2">
+              <option value="Payé">Payé</option>
+              <option value="Acompte">Acompte</option>
+              <option value="Non payé">Non payé</option>
+            </select>
           </div>
         </div>
+      </div>
 
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">Tâches du projet</h2>

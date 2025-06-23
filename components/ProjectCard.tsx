@@ -1,11 +1,13 @@
 'use client';
-import { FaCamera } from 'react-icons/fa';
+import { Camera, Video, Banknote, Star, Copy, Calendar, Pen, Trash } from 'lucide-react';
 import { Project, Status } from './ProjectsProvider';
 
 interface ProjectCardProps {
   project: Project;
   onEdit: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onToggleFavorite: () => void;
   onOpen: () => void;
 }
 
@@ -18,53 +20,66 @@ const statusColors: Record<Status, string> = {
   Terminé: 'bg-gray-500 text-white',
 };
 
-export default function ProjectCard({ project, onEdit, onDelete, onOpen }: ProjectCardProps) {
+const paymentColors = {
+  'Payé': 'bg-emerald-100 text-emerald-700',
+  'Acompte': 'bg-orange-100 text-orange-700',
+  'Non payé': 'bg-red-100 text-red-700',
+};
+
+export default function ProjectCard({ project, onEdit, onDelete, onDuplicate, onToggleFavorite, onOpen }: ProjectCardProps) {
   return (
     <div
       onClick={onOpen}
-      className="cursor-pointer rounded-xl bg-gray-800 p-6 text-gray-100 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
+      className="relative cursor-pointer rounded-xl bg-gray-800 p-6 text-gray-100 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
     >
+      <button
+        aria-label={project.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+        className="absolute right-2 top-2 rounded p-1 hover:bg-gray-700"
+      >
+        <Star className={`h-4 w-4 ${project.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+      </button>
       <div className="flex items-center space-x-2">
-        <FaCamera className="text-xl text-gray-400" />
+        {project.type === 'Photo' ? <Camera className="h-5 w-5 text-gray-400" /> : <Video className="h-5 w-5 text-gray-400" />}
         <h2 className="text-lg font-semibold">{project.name}</h2>
       </div>
       <p className="text-sm text-gray-300">Client : {project.client}</p>
       <p className="mt-2 text-sm text-gray-200">{project.description}</p>
       <div className="mt-2 flex items-center justify-between text-sm">
         <span className="flex items-center space-x-1 text-gray-300">
-          <span role="img" aria-label="date">
-            📅
-          </span>
+          <Calendar className="h-4 w-4" />
           <span>{project.startDate}</span>
         </span>
         <span className="flex items-center space-x-1 text-green-400">
-          <span role="img" aria-label="budget">
-            💶
-          </span>
-          <span>{project.budget}</span>
+          <Banknote className="h-4 w-4" />
+          <span className="text-sm">{project.budget} €</span>
         </span>
       </div>
-      <span className={`mt-2 inline-block rounded px-2 py-1 text-xs font-semibold ${statusColors[project.status]}`}>{project.status}</span>
+      <div className="mt-2 flex items-center justify-between">
+        <span className={`rounded px-2 py-1 text-xs font-semibold ${statusColors[project.status]}`}>{project.status}</span>
+        <span className={`rounded px-2 py-1 text-xs font-semibold ${paymentColors[project.paymentStatus]}`}>{project.paymentStatus}</span>
+      </div>
       <div className="mt-4 flex space-x-2">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="flex items-center space-x-1 rounded border border-yellow-500 px-3 py-1 text-sm text-yellow-600 hover:bg-yellow-50 dark:border-yellow-400 dark:text-yellow-400"
+          aria-label="Modifier"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          className="rounded border border-yellow-500 p-1 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-400 dark:text-yellow-400"
         >
-          <span>✏️</span>
-          <span>Modifier</span>
+          <Pen className="h-4 w-4" />
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="flex items-center space-x-1 rounded border border-red-500 px-3 py-1 text-sm text-red-600 hover:bg-red-50 dark:border-red-400 dark:text-red-400"
+          aria-label="Dupliquer"
+          onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+          className="rounded border border-gray-500 p-1 text-gray-300 hover:bg-gray-700"
         >
-          <span>🗑️</span>
-          <span>Supprimer</span>
+          <Copy className="h-4 w-4" />
+        </button>
+        <button
+          aria-label="Supprimer"
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          className="rounded border border-red-500 p-1 text-red-600 hover:bg-red-50 dark:border-red-400 dark:text-red-400"
+        >
+          <Trash className="h-4 w-4" />
         </button>
       </div>
     </div>
