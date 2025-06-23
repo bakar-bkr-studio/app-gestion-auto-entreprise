@@ -21,6 +21,9 @@ export interface DocumentFile {
   path: string;
 }
 
+export type PaymentStatus = 'Payé' | 'Acompte' | 'Non payé';
+export type ProjectType = 'Photo' | 'Video';
+
 export interface Project {
   id: number;
   name: string;
@@ -30,6 +33,9 @@ export interface Project {
   endDate: string;
   budget: number;
   status: Status;
+  type: ProjectType;
+  paymentStatus: PaymentStatus;
+  isFavorite: boolean;
   tasks: Task[];
   notes: string;
   documents: DocumentFile[];
@@ -40,6 +46,8 @@ type ProjectsContextType = {
   addProject: (project: Omit<Project, 'id'>) => void;
   updateProject: (id: number, project: Omit<Project, 'id'>) => void;
   deleteProject: (id: number) => void;
+  duplicateProject: (id: number) => void;
+  toggleFavorite: (id: number) => void;
 };
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
@@ -54,6 +62,9 @@ const initialProjects: Project[] = [
     endDate: '2024-06-15',
     budget: 1500,
     status: 'Tournage',
+    type: 'Photo',
+    paymentStatus: 'Acompte',
+    isFavorite: false,
     tasks: [],
     notes: '',
     documents: [],
@@ -67,6 +78,9 @@ const initialProjects: Project[] = [
     endDate: '2024-05-02',
     budget: 2000,
     status: 'Montage',
+    type: 'Video',
+    paymentStatus: 'Non payé',
+    isFavorite: false,
     tasks: [],
     notes: '',
     documents: [],
@@ -80,6 +94,9 @@ const initialProjects: Project[] = [
     endDate: '2024-04-22',
     budget: 800,
     status: 'Conception',
+    type: 'Photo',
+    paymentStatus: 'Payé',
+    isFavorite: false,
     tasks: [],
     notes: '',
     documents: [],
@@ -102,8 +119,19 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     setProjects(projects.filter((p) => p.id !== id));
   };
 
+  const duplicateProject = (id: number) => {
+    const target = projects.find(p => p.id === id);
+    if (!target) return;
+    const newId = projects.length ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+    setProjects([...projects, { ...target, id: newId, name: `${target.name} (copie)` }]);
+  };
+
+  const toggleFavorite = (id: number) => {
+    setProjects(projects.map(p => p.id === id ? { ...p, isFavorite: !p.isFavorite } : p));
+  };
+
   return (
-    <ProjectsContext.Provider value={{ projects, addProject, updateProject, deleteProject }}>
+    <ProjectsContext.Provider value={{ projects, addProject, updateProject, deleteProject, duplicateProject, toggleFavorite }}>
       {children}
     </ProjectsContext.Provider>
   );
