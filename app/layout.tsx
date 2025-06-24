@@ -2,10 +2,6 @@ import '../styles/globals.css';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export const metadata = {
-  title: 'BKR STUDIO APP',
-};
-
 import { ReactNode } from 'react';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 
