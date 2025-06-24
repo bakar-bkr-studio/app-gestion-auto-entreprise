@@ -1,45 +1,83 @@
 'use client';
-import { Client } from '../lib/data/clients';
-import { RefreshCw, Pencil, Trash2 } from 'lucide-react';
+import { Client } from '../lib/data/clients'
+import { Pencil, Trash2 } from 'lucide-react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { Button } from './ui/button'
 
 interface ClientCardProps {
   client: Client;
-  onRefresh: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export default function ClientCard({ client, onRefresh, onEdit, onDelete }: ClientCardProps) {
+export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
   const initials = `${client.firstName.charAt(0)}${client.lastName.charAt(0)}`;
 
   return (
-    <div className="rounded border bg-white p-4 shadow dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex items-center space-x-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
+    <Card className="transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <CardHeader className="flex flex-row items-center gap-3 pb-2">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold">
           {initials}
         </div>
         <div className="flex-1">
-          <p className="font-semibold">{client.firstName} {client.lastName}</p>
-          {client.company && <p className="text-sm text-gray-500">{client.company}</p>}
+          <CardTitle className="text-base font-semibold">
+            {client.firstName} {client.lastName}
+          </CardTitle>
+          {client.company && (
+            <p className="text-sm text-muted-foreground">{client.company}</p>
+          )}
         </div>
-        <span className={`rounded px-2 py-1 text-xs ${client.status === 'Client' ? 'bg-green-200 text-green-800' : 'bg-orange-200 text-orange-800'}`}>{client.status}</span>
-      </div>
-      <div className="mt-2 space-y-1 text-sm">
-        <a href={`mailto:${client.email}`} className="block text-blue-600 underline">{client.email}</a>
-        <p>{client.phone}</p>
-        <p>{client.address}</p>
-        <p className="text-xs text-gray-500">Ajouté le {client.dateAdded}</p>
-        <div className="flex flex-wrap gap-1 pt-1">
-          {client.tags.map(tag => (
-            <span key={tag} className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700">{tag}</span>
-          ))}
-        </div>
-      </div>
-      <div className="mt-3 flex justify-end space-x-2 text-sm">
-        <button onClick={onRefresh} className="rounded bg-gray-100 p-1 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"><RefreshCw size={16} /></button>
-        <button onClick={onEdit} className="rounded bg-gray-100 p-1 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"><Pencil size={16} /></button>
-        <button onClick={onDelete} className="rounded bg-red-500 p-1 text-white hover:bg-red-600"><Trash2 size={16} /></button>
-      </div>
-    </div>
-  );
+        <span
+          className={`rounded px-2 py-1 text-xs ${client.status === 'Client' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}
+        >
+          {client.status}
+        </span>
+      </CardHeader>
+      <CardContent className="space-y-1 text-sm">
+        {client.email && (
+          <a
+            href={`mailto:${client.email}`}
+            className="block break-words text-primary underline"
+          >
+            {client.email}
+          </a>
+        )}
+        {client.phone && <p>{client.phone}</p>}
+        {client.address && <p>{client.address}</p>}
+        <p className="text-xs text-muted-foreground">Ajouté le {client.dateAdded}</p>
+        {client.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {client.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="justify-end space-x-2 pt-2">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={onEdit}
+          aria-label="Modifier"
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="destructive"
+          onClick={onDelete}
+          aria-label="Supprimer"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  )
 }
