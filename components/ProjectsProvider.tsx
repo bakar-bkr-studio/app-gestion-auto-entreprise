@@ -104,19 +104,20 @@ const initialProjects: Project[] = [
 ];
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(() => {
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('projects');
       if (stored) {
         try {
-          return JSON.parse(stored) as Project[];
+          setProjects(JSON.parse(stored) as Project[]);
         } catch {
           /* ignore */
         }
       }
     }
-    return initialProjects;
-  });
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
