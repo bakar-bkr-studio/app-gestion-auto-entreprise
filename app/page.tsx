@@ -33,7 +33,6 @@ import {
   Trash
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import AddSiteModal from '@/components/AddSiteModal'
 import { useWebsites, Website } from '@/components/WebsitesProvider'
 import Toast from '@/components/Toast'
@@ -286,7 +285,7 @@ export default function DashboardPage() {
                 <CardHeader className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Image src="/placeholder.svg" alt="miniature" width={24} height={24} />
+                      <Briefcase className="w-5 h-5 text-muted-foreground" />
                       <CardTitle className="text-base font-medium">{p.name}</CardTitle>
                     </div>
                     <Badge className={`${statusColors[p.status]}`}>{p.status}</Badge>
