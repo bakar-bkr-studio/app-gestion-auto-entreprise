@@ -45,7 +45,7 @@ export default function RessourcesPage() {
 
   return (
     <div className="space-y-8 p-6">
-      <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-md">
+      <section className="space-y-4 rounded-xl border border-gray-200 bg-gray-100 text-black p-4 shadow-md">
         <header className="flex items-center justify-between">
           <h2 className="flex items-center text-xl font-semibold text-gray-900">
             <FileText className="mr-2 h-5 w-5" /> Documents
@@ -61,7 +61,7 @@ export default function RessourcesPage() {
           {documents.map(doc => (
             <div
               key={doc.id}
-              className="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105"
+              className="group relative rounded-xl border border-gray-200 bg-gray-100 text-black p-4 shadow-md transition-transform hover:scale-105"
             >
               {doc.priority && (
                 <Star className="absolute right-2 top-2 h-4 w-4 text-yellow-500" />
@@ -89,7 +89,7 @@ export default function RessourcesPage() {
         </div>
       </section>
 
-      <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-md">
+      <section className="space-y-4 rounded-xl border border-gray-200 bg-gray-100 text-black p-4 shadow-md">
         <header className="flex items-center justify-between">
           <h2 className="flex items-center text-xl font-semibold text-gray-900">
             <Globe className="mr-2 h-5 w-5" /> Sites Web
@@ -105,7 +105,7 @@ export default function RessourcesPage() {
           {sites.map(site => (
             <div
               key={site.id}
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-md transition-transform hover:scale-105"
+              className="rounded-xl border border-gray-200 bg-gray-100 text-black p-4 shadow-md transition-transform hover:scale-105"
             >
               <h3 className="font-bold">{site.name}</h3>
               <p className="text-sm text-gray-600">{site.category}</p>
