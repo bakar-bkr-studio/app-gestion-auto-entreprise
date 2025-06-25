@@ -23,6 +23,9 @@ import {
   Trash
 } from 'lucide-react'
 import Link from 'next/link'
+import AddSiteModal from '@/components/AddSiteModal'
+import { useWebsites, Website } from '@/components/WebsitesProvider'
+import Toast from '@/components/Toast'
 
 interface Task {
   id: number
@@ -46,8 +49,12 @@ const statusColors: Record<Status, string> = {
 
 export default function DashboardPage() {
   const { projects, deleteProject } = useProjects()
+  const { websites, addWebsite, updateWebsite, deleteWebsite } = useWebsites()
   const [tasks, setTasks] = useState<Task[]>([])
   const [stepFilter, setStepFilter] = useState<Status | 'Tous'>('Tous')
+  const [showSiteModal, setShowSiteModal] = useState(false)
+  const [editingSite, setEditingSite] = useState<Website | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -109,9 +116,54 @@ export default function DashboardPage() {
 
   const stepOrder: Status[] = ['Conception', 'Tournage', 'Montage', 'Prêt', 'Envoyé', 'Terminé']
 
+  const openAddSite = () => {
+    setEditingSite(null)
+    setShowSiteModal(true)
+  }
+
+  const handleEditSite = (site: Website) => {
+    setEditingSite(site)
+    setShowSiteModal(true)
+  }
+
+  const handleDeleteSite = (id: number) => {
+    deleteWebsite(id)
+    setToast('Site supprimé \u2714\uFE0F')
+  }
+
+
   return (
     <div className="space-y-8 p-6">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Sites favoris</h2>
+          <Button size="sm" onClick={openAddSite}>+ Ajouter un site</Button>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {websites.map(site => (
+            <Card key={site.id} className="relative group overflow-hidden">
+              <a href={site.url} target="_blank" rel="noreferrer" className="block p-4">
+                <div className="flex items-center space-x-2">
+                  <img src={`https://www.google.com/s2/favicons?domain=${site.url}`} alt="" className="h-4 w-4" />
+                  <span className="text-sm font-medium truncate">{site.name}</span>
+                </div>
+                {site.description && (
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{site.description}</p>
+                )}
+              </a>
+              <div className="absolute right-1 top-1 flex space-x-1 opacity-0 group-hover:opacity-100">
+                <Button size="icon" variant="ghost" onClick={e => {e.preventDefault(); handleEditSite(site);}}>
+                  <Pencil className="h-3 w-3" />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={e => {e.preventDefault(); handleDeleteSite(site.id);}}>
+                  <Trash className="h-3 w-3 text-red-500" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <Card className="hover:scale-105 transition-transform duration-300 ease-in-out">
           <CardHeader className="flex items-center justify-between pb-2 space-y-0">
@@ -284,6 +336,25 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+      <AddSiteModal
+        isOpen={showSiteModal}
+        site={editingSite}
+        onAdd={data => {
+          addWebsite(data)
+          setToast('Site ajout\u00e9 !')
+        }}
+        onUpdate={data => {
+          if (editingSite) {
+            updateWebsite(editingSite.id, data)
+            setToast('Site modifi\u00e9 !')
+          }
+        }}
+        onClose={() => {
+          setShowSiteModal(false)
+          setEditingSite(null)
+        }}
+      />
+      <Toast message={toast} onClose={() => setToast(null)} />
     </div>
   )
 }
