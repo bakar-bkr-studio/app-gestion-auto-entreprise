@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useProjects } from '../../components/ProjectsProvider';
 import Toast from '../../components/Toast';
 import { Plus, X, Pencil, Trash2 } from 'lucide-react';
+import { Input } from '../../components/ui/input';
 
 interface Task {
   id: number;
@@ -126,7 +127,7 @@ export default function OrganisationPage() {
               <button
                 key={status}
                 onClick={() => setTaskFilter(status)}
-                className={`rounded px-3 py-1 text-sm transition-colors ${taskFilter === status ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`rounded-md px-3 py-1 text-sm transition-colors ${taskFilter === status ? 'bg-black text-white' : 'bg-white text-black border border-gray-300'}`}
               >
                 {status}
               </button>
@@ -134,7 +135,7 @@ export default function OrganisationPage() {
             <select
               value={projectFilter}
               onChange={e => setProjectFilter(e.target.value)}
-              className="rounded border px-2 py-1 text-sm"
+              className="rounded-md border-gray-300 bg-white px-2 py-1 text-sm text-black shadow-sm"
             >
               <option value="Tous">Tous les projets</option>
               {projects.map(p => (
@@ -189,11 +190,11 @@ export default function OrganisationPage() {
         <header className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-semibold text-gray-900">Notes</h2>
           <div className="flex flex-wrap items-center gap-2">
-            <input
+            <Input
               value={noteSearch}
               onChange={e => setNoteSearch(e.target.value)}
               placeholder="Rechercher dans les notes..."
-              className="rounded border px-3 py-1 text-sm"
+              className="rounded-md border-gray-300 bg-white text-black px-3 py-1 text-sm shadow-sm"
             />
             {['Toutes', ...allTags].map(tag => (
               <button

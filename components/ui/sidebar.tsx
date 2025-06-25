@@ -2,16 +2,22 @@ import * as React from 'react'
 
 import { cn } from '../lib/utils'
 
-const Sidebar = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('flex flex-col w-60 bg-white dark:bg-gray-800 shadow-md', className)}
-    {...props}
-  />
-))
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  collapsed?: boolean
+}
+
+const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
+  ({ className, collapsed, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        `flex flex-col ${collapsed ? 'w-16' : 'w-60'} bg-[#0f172a] text-white shadow-md transition-all duration-300`,
+        className
+      )}
+      {...props}
+    />
+  )
+)
 Sidebar.displayName = 'Sidebar'
 
 const SidebarHeader = React.forwardRef<

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Input } from './ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProjectCard from './ProjectCard';
@@ -93,18 +94,18 @@ export default function ProjectList() {
         </Link>
       </div>
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input
+        <Input
           aria-label="Rechercher"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full rounded border px-3 py-1"
+          className="w-full rounded-md border-gray-300 bg-white text-black shadow-sm"
           placeholder="Rechercher..."
         />
         <select
           aria-label="Trier"
           value={sort}
           onChange={e => setSort(e.target.value as any)}
-          className="rounded border px-3 py-1"
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
         >
           <option value="date-desc">Date ↓</option>
           <option value="date-asc">Date ↑</option>
@@ -116,7 +117,7 @@ export default function ProjectList() {
           aria-label="Paiement"
           value={filterPayment}
           onChange={e => setFilterPayment(e.target.value as any)}
-          className="rounded border px-3 py-1"
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
         >
           <option value="Tous">Tous</option>
           <option value="Payé">Payé</option>
@@ -126,7 +127,7 @@ export default function ProjectList() {
         <button
           aria-label="Vue Kanban"
           onClick={() => setView(view === 'grid' ? 'kanban' : 'grid')}
-          className="rounded border px-3 py-1"
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
         >
           {view === 'grid' ? 'Kanban' : 'Grille'}
         </button>
