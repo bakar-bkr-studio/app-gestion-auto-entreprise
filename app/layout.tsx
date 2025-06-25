@@ -19,6 +19,7 @@ import {
 
 import { ReactNode } from 'react';
 import { ProjectsProvider } from '../components/ProjectsProvider';
+import { WebsitesProvider } from '../components/WebsitesProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -80,7 +81,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </SidebarMenu>
         </Sidebar>
         <ProjectsProvider>
-          <main className="flex-1">{children}</main>
+          <WebsitesProvider>
+            <main className="flex-1">{children}</main>
+          </WebsitesProvider>
         </ProjectsProvider>
       </body>
     </html>
