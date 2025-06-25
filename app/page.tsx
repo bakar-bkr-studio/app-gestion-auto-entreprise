@@ -33,6 +33,7 @@ import {
   Trash
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import AddSiteModal from '@/components/AddSiteModal'
 import { useWebsites, Website } from '@/components/WebsitesProvider'
 import Toast from '@/components/Toast'
