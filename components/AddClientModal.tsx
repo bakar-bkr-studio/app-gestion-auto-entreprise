@@ -1,10 +1,11 @@
 'use client';
 import { useForm } from 'react-hook-form'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Client } from '../lib/data/clients'
 import { X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from './ui/select'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { cn } from './lib/utils'
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -51,6 +53,8 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
       ? { ...client, tags: client.tags.join(', ') }
       : { status: 'Client' },
   });
+  const tagSuggestions = ['mariage', 'corporate', 'e-commerce', 'client-fidele', 'startup']
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (client) {
@@ -69,9 +73,8 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
     }
   }, [client, reset]);
 
-  if (!isOpen) return null;
-
   const onSubmit = (data: FormValues) => {
+    setLoading(true)
     const now = new Date();
     const dateAdded = `${now.getDate().toString().padStart(2, '0')}/${
       (now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
@@ -97,12 +100,21 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
 
     reset();
     onClose();
+    setLoading(false)
   };
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <Card className="mx-2 w-full max-w-xl animate-in fade-in-0 zoom-in-95">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}>
+            <Card className="mx-2 w-full max-w-xl">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{client ? 'Modifier le client' : 'Ajouter un client'}</CardTitle>
             <Button type="button" size="icon" variant="ghost" onClick={onClose}>
@@ -113,12 +125,12 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">Prénom</Label>
-                <Input id="firstName" {...register('firstName')} />
+                <Input id="firstName" {...register('firstName')} className={cn(errors.firstName && 'border-red-500 animate-pulse')} />
                 {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Nom</Label>
-                <Input id="lastName" {...register('lastName')} />
+                <Input id="lastName" {...register('lastName')} className={cn(errors.lastName && 'border-red-500 animate-pulse')} />
                 {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
               </div>
               <div className="space-y-2">
@@ -151,16 +163,32 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="tags">Tags (séparés par des virgules)</Label>
-                <Textarea id="tags" {...register('tags')} placeholder="mariage, corporate" />
+                <Input list="tag-list" id="tags" {...register('tags')} placeholder="mariage, corporate" />
+                <datalist id="tag-list">
+                  {tagSuggestions.map(t => (
+                    <option key={t} value={t} />
+                  ))}
+                </datalist>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-            <Button type="submit">{client ? 'Modifier' : 'Ajouter'}</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="4" fill="none" />
+                </svg>
+              ) : null}
+              {client ? 'Modifier' : 'Ajouter'}
+            </Button>
           </CardFooter>
         </form>
       </Card>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

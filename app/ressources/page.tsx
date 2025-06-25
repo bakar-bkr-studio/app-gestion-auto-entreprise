@@ -190,28 +190,56 @@ function AddDocumentModal({ onAdd, onClose }: AddDocumentModalProps) {
         </div>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">Nom du document</label>
-            <input value={name} onChange={e => setName(e.target.value)} className="w-full rounded border px-3 py-2" required />
+            <label className="mb-1 block text-sm font-medium text-black">Nom du document</label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              required
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Catégorie principale</label>
-            <input value={category} onChange={e => setCategory(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <label className="mb-1 block text-sm font-medium text-black">Catégorie principale</label>
+            <input
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded border px-3 py-2" rows={2} />
+            <label className="mb-1 block text-sm font-medium text-black">Description</label>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              rows={2}
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Tags secondaires</label>
-            <input value={tags} onChange={e => setTags(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="mariage, corporate" />
+            <label className="mb-1 block text-sm font-medium text-black">Tags secondaires</label>
+            <input
+              value={tags}
+              onChange={e => setTags(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              placeholder="mariage, corporate"
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Date</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <label className="mb-1 block text-sm font-medium text-black">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Chemin local du fichier</label>
-            <input value={path} onChange={e => setPath(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <label className="mb-1 block text-sm font-medium text-black">Chemin local du fichier</label>
+            <input
+              value={path}
+              onChange={e => setPath(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            />
           </div>
           <label className="flex items-center space-x-2 text-sm">
             <input type="checkbox" checked={priority} onChange={e => setPriority(e.target.checked)} />
@@ -219,7 +247,7 @@ function AddDocumentModal({ onAdd, onClose }: AddDocumentModalProps) {
           </label>
         </div>
         <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border px-4 py-1 hover:bg-gray-100">Annuler</button>
+          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
           <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
         </div>
       </div>

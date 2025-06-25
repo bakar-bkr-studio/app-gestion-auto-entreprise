@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,12 +10,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useProjects, Task, DocumentFile } from "../../components/ProjectsProvider";
 import { Client, initialClients } from "../../lib/data/clients";
 import { Input } from "../../components/ui/input";
+import { DateInput } from "../../components/ui/date-input";
+import {
+  Pencil,
+  Video,
+  Scissors,
+  CheckCircle,
+  Send,
+  Check,
+  Coins,
+  Euro,
+  Ban,
+} from "lucide-react";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup } from "../../components/ui/select";
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Switch } from "../../components/ui/switch";
+import Toast from "../../components/Toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Ce champ est requis"),
@@ -36,7 +50,12 @@ export default function NewProjectPage() {
   const searchParams = useSearchParams();
   const { projects, addProject, updateProject } = useProjects();
   const editId = searchParams.get("id");
-  const project = editId ? projects.find((p) => p.id === Number(editId)) : undefined;
+  const duplicateId = searchParams.get("duplicate");
+  const project = editId
+    ? projects.find((p) => p.id === Number(editId))
+    : duplicateId
+      ? projects.find((p) => p.id === Number(duplicateId))
+      : undefined;
 
   const [tasks, setTasks] = useState<Task[]>(project?.tasks ?? []);
   const [taskText, setTaskText] = useState("");
@@ -57,6 +76,9 @@ export default function NewProjectPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   const {
     register,
@@ -67,7 +89,10 @@ export default function NewProjectPage() {
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: project?.name ?? "",
+      name:
+        duplicateId && project && !editId
+          ? `Copie de ${project.name}`
+          : project?.name ?? "",
       client: project?.client ?? "",
       description: project?.description ?? "",
       startDate: project?.startDate ?? "",
@@ -131,17 +156,34 @@ export default function NewProjectPage() {
     } else {
       addProject(payload);
     }
-    router.push("/projects");
+    setToastType('success');
+    setToast("Projet créé avec succès ✅");
+    setTimeout(() => {
+      setClosing(true);
+    }, 500);
   };
 
   return (
     <div className="p-4">
-      <Card className="mx-auto max-w-3xl">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: closing ? 0 : 1, scale: closing ? 0.95 : 1 }}
+        onAnimationComplete={() => {
+          if (closing) router.push('/projects')
+        }}
+      >
+        <Card className="mx-auto max-w-3xl backdrop-blur-md">
         <CardHeader>
           <CardTitle>{editId ? "Modifier le projet" : "Nouveau projet"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit, () => {
+              setToastType('error');
+              setToast('Erreur : veuillez remplir tous les champs obligatoires ❌');
+            })}
+            className="space-y-6"
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom du projet</Label>
@@ -192,11 +234,11 @@ export default function NewProjectPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Date de début</Label>
-                <Input type="date" id="startDate" {...register("startDate")} />
+                <DateInput id="startDate" {...register("startDate")} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dueDate">Date de fin</Label>
-                <Input type="date" id="dueDate" {...register("dueDate")} />
+                <DateInput id="dueDate" {...register("dueDate")} />
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
@@ -207,8 +249,18 @@ export default function NewProjectPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(["Conception","Tournage","Montage","Prêt","Envoyé","Terminé"] as const).map(s => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    {(["Conception","Tournage","Montage","Prêt","Envoyé","Terminé"] as const).map((s) => (
+                      <SelectItem key={s} value={s}>
+                        <span className="flex items-center gap-2">
+                          {s === 'Conception' && <Pencil className="h-4 w-4" />}
+                          {s === 'Tournage' && <Video className="h-4 w-4" />}
+                          {s === 'Montage' && <Scissors className="h-4 w-4" />}
+                          {s === 'Prêt' && <CheckCircle className="h-4 w-4" />}
+                          {s === 'Envoyé' && <Send className="h-4 w-4" />}
+                          {s === 'Terminé' && <Check className="h-4 w-4" />}
+                          {s}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -224,9 +276,15 @@ export default function NewProjectPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Payé">Payé</SelectItem>
-                    <SelectItem value="Acompte">Acompte</SelectItem>
-                    <SelectItem value="Non payé">Non payé</SelectItem>
+                    <SelectItem value="Payé">
+                      <span className="flex items-center gap-2"><Euro className="h-4 w-4" />Payé</span>
+                    </SelectItem>
+                    <SelectItem value="Acompte">
+                      <span className="flex items-center gap-2"><Coins className="h-4 w-4" />Acompte</span>
+                    </SelectItem>
+                    <SelectItem value="Non payé">
+                      <span className="flex items-center gap-2"><Ban className="h-4 w-4" />Non payé</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -264,12 +322,25 @@ export default function NewProjectPage() {
               }} />
             </div>
             <CardFooter className="flex justify-end gap-2 p-0">
-              <Button type="button" variant="secondary" onClick={() => router.push('/projects')}>Annuler</Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setClosing(true)}
+              >
+                Annuler
+              </Button>
               <Button type="submit" disabled={loading}>{loading ? 'Ajout...' : editId ? 'Enregistrer' : 'Créer le projet'}</Button>
             </CardFooter>
           </form>
         </CardContent>
       </Card>
+      </motion.div>
+      <Toast
+        message={toast}
+        onClose={() => setToast(null)}
+        position="top-right"
+        type={toastType}
+      />
     </div>
   );
 }

@@ -2,7 +2,16 @@
 import '../styles/globals.css';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  Folder,
+  Users,
+  ListTodo,
+  FileText,
+} from 'lucide-react';
+import { cn } from '../components/lib/utils';
 
 import {
   Sidebar,
@@ -12,11 +21,13 @@ import {
 } from '@/components/ui/sidebar';
 
 import { ReactNode, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 import { WebsitesProvider } from '../components/WebsitesProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
 
   return (
     <html lang="fr" className="dark">
@@ -30,37 +41,87 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             >
               {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
             </button>
-            {!collapsed && (
-              <div className="flex items-center space-x-2 text-2xl font-bold">
-                <Image src="/logo.svg" width={32} height={32} alt="logo" />
-                <span>BKR STUDIO APP</span>
-              </div>
-            )}
+            <div className="flex items-center space-x-2 text-2xl font-bold">
+              <Image src="/logo.svg" width={32} height={32} alt="logo" />
+              {!collapsed && <span>BKR STUDIO APP</span>}
+            </div>
           </SidebarHeader>
           <SidebarMenu className="mt-2 flex-1">
             <SidebarMenuItem>
-              <Link className="block px-6 py-2 text-white hover:bg-gray-700" href="/">
-                Tableau de bord
+              <Link
+                href="/"
+                className={cn(
+                  'flex items-center rounded px-6 py-2 transition-all hover:bg-muted/20 hover:font-semibold',
+                  collapsed ? 'gap-0 justify-center' : 'gap-2',
+                  pathname === '/'
+                    ? 'bg-muted border-l-4 border-primary font-bold text-primary'
+                    : 'text-white'
+                )}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className={cn('transition-all', collapsed && 'w-0 overflow-hidden opacity-0')}>
+                  Tableau de bord
+                </span>
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link className="block px-6 py-2 text-white hover:bg-gray-700" href="/projects">
-                Projets
+              <Link
+                href="/projects"
+                className={cn(
+                  'flex items-center rounded px-6 py-2 transition-all hover:bg-muted/20 hover:font-semibold',
+                  collapsed ? 'gap-0 justify-center' : 'gap-2',
+                  pathname?.startsWith('/projects')
+                    ? 'bg-muted border-l-4 border-primary font-bold text-primary'
+                    : 'text-white'
+                )}
+              >
+                <Folder className="h-5 w-5" />
+                <span className={cn('transition-all', collapsed && 'w-0 overflow-hidden opacity-0')}>Projets</span>
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link className="block px-6 py-2 text-white hover:bg-gray-700" href="/clients">
-                Clients
+              <Link
+                href="/clients"
+                className={cn(
+                  'flex items-center rounded px-6 py-2 transition-all hover:bg-muted/20 hover:font-semibold',
+                  collapsed ? 'gap-0 justify-center' : 'gap-2',
+                  pathname?.startsWith('/clients')
+                    ? 'bg-muted border-l-4 border-primary font-bold text-primary'
+                    : 'text-white'
+                )}
+              >
+                <Users className="h-5 w-5" />
+                <span className={cn('transition-all', collapsed && 'w-0 overflow-hidden opacity-0')}>Clients</span>
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link className="block px-6 py-2 text-white hover:bg-gray-700" href="/organisation">
-                Organisation
+              <Link
+                href="/organisation"
+                className={cn(
+                  'flex items-center rounded px-6 py-2 transition-all hover:bg-muted/20 hover:font-semibold',
+                  collapsed ? 'gap-0 justify-center' : 'gap-2',
+                  pathname?.startsWith('/organisation')
+                    ? 'bg-muted border-l-4 border-primary font-bold text-primary'
+                    : 'text-white'
+                )}
+              >
+                <ListTodo className="h-5 w-5" />
+                <span className={cn('transition-all', collapsed && 'w-0 overflow-hidden opacity-0')}>Organisation</span>
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link className="block px-6 py-2 text-white hover:bg-gray-700" href="/ressources">
-                Ressources
+              <Link
+                href="/ressources"
+                className={cn(
+                  'flex items-center rounded px-6 py-2 transition-all hover:bg-muted/20 hover:font-semibold',
+                  collapsed ? 'gap-0 justify-center' : 'gap-2',
+                  pathname?.startsWith('/ressources')
+                    ? 'bg-muted border-l-4 border-primary font-bold text-primary'
+                    : 'text-white'
+                )}
+              >
+                <FileText className="h-5 w-5" />
+                <span className={cn('transition-all', collapsed && 'w-0 overflow-hidden opacity-0')}>Ressources</span>
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>

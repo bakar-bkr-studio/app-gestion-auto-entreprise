@@ -62,14 +62,34 @@ export default function AddSiteModal({ isOpen, onAdd, onUpdate, onClose, site }:
           </div>
           <div className="space-y-2">
             <Label htmlFor="url">URL</Label>
-            <Input id="url" type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://" required />
+            <Input
+              id="url"
+              type="url"
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="https://"
+              required
+            />
+            {url && (
+              <img
+                src={`https://icon.horse/icon/${(() => {
+                  try {
+                    return new URL(url).hostname;
+                  } catch {
+                    return '';
+                  }
+                })()}`}
+                alt="favicon preview"
+                className="h-6 w-6"
+              />
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} rows={2} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tag">Tag / Cat\u00e9gorie</Label>
+            <Label htmlFor="tag">Tag / Catégorie</Label>
             <Input id="tag" value={tag} onChange={e => setTag(e.target.value)} />
           </div>
         </CardContent>
