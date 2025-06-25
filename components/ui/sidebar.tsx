@@ -11,7 +11,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
     <div
       ref={ref}
       className={cn(
-        `flex flex-col ${collapsed ? 'w-16' : 'w-60'} bg-[#0f172a] text-white shadow-md transition-all duration-300`,
+        `flex flex-col ${collapsed ? 'w-16' : 'w-60'} bg-[#0f172a] text-white shadow-md transition-all duration-300 overflow-hidden`,
         className
       )}
       {...props}

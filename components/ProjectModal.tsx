@@ -2,6 +2,13 @@
 import { useState } from 'react';
 import { Project, Task, DocumentFile, useProjects, Status } from './ProjectsProvider';
 import DeleteModal from './DeleteModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from './ui/dialog';
 
 interface ProjectModalProps {
   project: Project;
@@ -47,12 +54,11 @@ export default function ProjectModal({ project, onClose, onEdit }: ProjectModalP
     onClose();
   };
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 overflow-auto">
-      <div className="m-4 w-full max-w-2xl space-y-6 rounded-lg bg-gray-900 p-6 text-gray-100 shadow-lg">
-        <div className="flex items-start justify-between">
-          <h2 className="text-2xl font-bold flex-1 text-center">{project.name}</h2>
-          <button onClick={onClose} className="ml-4 text-xl">❌</button>
-        </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl bg-gray-900 text-gray-100">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">{project.name}</DialogTitle>
+        </DialogHeader>
         <div className="space-y-4">
           <div className="space-x-2 flex flex-wrap justify-center">
             {steps.map((s) => (
@@ -119,16 +125,16 @@ export default function ProjectModal({ project, onClose, onEdit }: ProjectModalP
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <button onClick={onEdit} className="rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400 sm:w-auto w-full">✏️ Modifier</button>
-          <button onClick={() => setShowDelete(true)} className="rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600 sm:w-auto w-full">🗑️ Supprimer</button>
-        </div>
-      </div>
+        <DialogFooter>
+          <button onClick={onEdit} className="rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400">✏️ Modifier</button>
+          <button onClick={() => setShowDelete(true)} className="rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600">🗑️ Supprimer</button>
+        </DialogFooter>
+      </DialogContent>
       <DeleteModal
         isOpen={showDelete}
         onCancel={() => setShowDelete(false)}
         onConfirm={confirmDelete}
       >Voulez-vous vraiment supprimer ce projet ?</DeleteModal>
-    </div>
+    </Dialog>
   );
 }

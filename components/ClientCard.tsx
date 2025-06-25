@@ -3,6 +3,8 @@ import { Client } from '../lib/data/clients'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
+import { Badge } from './ui/badge'
+import { stringToHslColor } from './lib/utils'
 
 interface ClientCardProps {
   client: Client;
@@ -11,16 +13,20 @@ interface ClientCardProps {
 }
 
 export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
-  const initials = `${client.firstName.charAt(0)}${client.lastName.charAt(0)}`;
+  const initials = `${client.firstName.charAt(0)}${client.lastName.charAt(0)}`
+  const bg = stringToHslColor(client.firstName + client.lastName)
 
   return (
-    <Card className="transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <Card className="mx-auto w-full max-w-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-primary-foreground"
+          style={{ backgroundColor: bg }}
+        >
           {initials}
         </div>
         <div className="flex-1">
-          <CardTitle className="text-base font-semibold">
+          <CardTitle className="text-lg font-semibold">
             {client.firstName} {client.lastName}
           </CardTitle>
           {client.company && (
@@ -42,18 +48,16 @@ export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps
             {client.email}
           </a>
         )}
-        {client.phone && <p>{client.phone}</p>}
-        {client.address && <p>{client.address}</p>}
+        {client.phone && <p className="text-muted-foreground">{client.phone}</p>}
+        {client.address && <p className="text-muted-foreground">{client.address}</p>}
+        <div className="my-2 h-px bg-border" />
         <p className="text-xs text-muted-foreground">Ajouté le {client.dateAdded}</p>
         {client.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
             {client.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-              >
+              <Badge key={tag} className="animate-in fade-in-0 zoom-in-95" variant="secondary">
                 {tag}
-              </span>
+              </Badge>
             ))}
           </div>
         )}

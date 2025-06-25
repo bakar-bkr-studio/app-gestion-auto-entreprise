@@ -289,16 +289,30 @@ function TaskModal({ projects, onAdd, onClose }: TaskModalProps) {
         </div>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">Titre</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded border px-3 py-2" required />
+            <label className="mb-1 block text-sm font-medium text-black">Titre</label>
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              required
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded border px-3 py-2" rows={3} />
+            <label className="mb-1 block text-sm font-medium text-black">Description</label>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              rows={3}
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Projet lié</label>
-            <select value={project} onChange={e => setProject(e.target.value)} className="w-full rounded border px-3 py-2">
+            <label className="mb-1 block text-sm font-medium text-black">Projet lié</label>
+            <select
+              value={project}
+              onChange={e => setProject(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            >
               <option value="">Aucun</option>
               {projects.map(p => (
                 <option key={p} value={p}>{p}</option>
@@ -318,12 +332,17 @@ function TaskModal({ projects, onAdd, onClose }: TaskModalProps) {
             ))}
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Date d'échéance</label>
-            <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <label className="mb-1 block text-sm font-medium text-black">Date d'échéance</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            />
           </div>
         </div>
         <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border px-4 py-1 hover:bg-gray-100">Annuler</button>
+          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
           <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
         </div>
       </div>
@@ -360,20 +379,34 @@ function NoteModal({ onAdd, onClose }: NoteModalProps) {
         </div>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">Titre</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded border px-3 py-2" required />
+            <label className="mb-1 block text-sm font-medium text-black">Titre</label>
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              required
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Description</label>
-            <textarea value={text} onChange={e => setText(e.target.value)} className="w-full rounded border px-3 py-2" rows={4} />
+            <label className="mb-1 block text-sm font-medium text-black">Description</label>
+            <textarea
+              value={text}
+              onChange={e => setText(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+              rows={4}
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Tags (séparés par des virgules)</label>
-            <input value={tags} onChange={e => setTags(e.target.value)} className="w-full rounded border px-3 py-2" />
+            <label className="mb-1 block text-sm font-medium text-black">Tags (séparés par des virgules)</label>
+            <input
+              value={tags}
+              onChange={e => setTags(e.target.value)}
+              className="w-full rounded border bg-white px-3 py-2 text-black"
+            />
           </div>
         </div>
         <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border px-4 py-1 hover:bg-gray-100">Annuler</button>
+          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
           <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
         </div>
       </div>

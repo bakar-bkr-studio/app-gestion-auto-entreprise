@@ -20,16 +20,20 @@ const statusColors: Record<Status, string> = {
 
 export default function ProjectList() {
   const router = useRouter();
-  const { projects, deleteProject, duplicateProject, toggleFavorite, updateProject } = useProjects();
+  const { projects, deleteProject, toggleFavorite, updateProject } = useProjects();
 
   const [filterStatus, setFilterStatus] = useState<Status | 'Tous'>('Tous');
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | 'Tous'>('Tous');
   const [sort, setSort] = useState<'date-desc' | 'date-asc' | 'budget-asc' | 'budget-desc' | 'favoris'>('date-desc');
   const [view, setView] = useState<'grid' | 'kanban'>('grid');
   const [search, setSearch] = useState('');
+  const [filterClient, setFilterClient] = useState<'Tous' | string>('Tous');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const clientOptions = Array.from(new Set(projects.map(p => p.client)));
 
   const handleEdit = (id: number) => router.push(`/new-project?id=${id}`);
 
@@ -44,6 +48,11 @@ export default function ProjectList() {
   const filtered = projects
     .filter(p => (filterStatus === 'Tous' ? true : p.status === filterStatus))
     .filter(p => (filterPayment === 'Tous' ? true : p.paymentStatus === filterPayment))
+    .filter(p => (filterClient === 'Tous' ? true : p.client === filterClient))
+    .filter(p =>
+      dateFrom ? new Date(p.startDate) >= new Date(dateFrom) : true
+    )
+    .filter(p => (dateTo ? new Date(p.startDate) <= new Date(dateTo) : true))
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   const sorted = [...filtered].sort((a, b) => {
@@ -58,7 +67,7 @@ export default function ProjectList() {
 
   const ordered = sorted;
 
-  const renderCards = (list: Project[]) => (
+  const renderCards = (list: Project[], compact = false) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {list.map(project => (
         <ProjectCard
@@ -66,9 +75,10 @@ export default function ProjectList() {
           project={project}
           onEdit={() => handleEdit(project.id)}
           onDelete={() => setDeleteId(project.id)}
-          onDuplicate={() => duplicateProject(project.id)}
+          onDuplicate={() => router.push(`/new-project?duplicate=${project.id}`)}
           onToggleFavorite={() => toggleFavorite(project.id)}
           onOpen={() => setActiveProject(project)}
+          compact={compact}
         />
       ))}
     </div>
@@ -79,7 +89,7 @@ export default function ProjectList() {
       {(['Conception', 'Tournage', 'Montage', 'Prêt', 'Envoyé', 'Terminé'] as Status[]).map(status => (
         <div key={status} className="space-y-2">
           <h3 className={`rounded px-2 py-1 text-sm font-semibold ${statusColors[status]}`}>{status}</h3>
-          {renderCards(ordered.filter(p => p.status === status))}
+          {renderCards(ordered.filter(p => p.status === status), true)}
         </div>
       ))}
     </div>
@@ -94,13 +104,42 @@ export default function ProjectList() {
         </Link>
       </div>
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Input
-          aria-label="Rechercher"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-md border-gray-300 bg-white text-black shadow-sm"
-          placeholder="Rechercher..."
-        />
+        <div className="relative w-full">
+          <Input
+            aria-label="Rechercher"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-md border-gray-300 bg-white text-black shadow-sm"
+            placeholder="Rechercher..."
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                setFilterClient('Tous');
+                setFilterStatus('Tous');
+                setFilterPayment('Tous');
+                setDateFrom('');
+                setDateTo('');
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <select
+          aria-label="Client"
+          value={filterClient}
+          onChange={e => setFilterClient(e.target.value)}
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
+        >
+          <option value="Tous">Tous</option>
+          {clientOptions.map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
         <select
           aria-label="Trier"
           value={sort}
@@ -124,6 +163,20 @@ export default function ProjectList() {
           <option value="Acompte">Acompte</option>
           <option value="Non payé">Non payé</option>
         </select>
+        <input
+          type="date"
+          aria-label="Du"
+          value={dateFrom}
+          onChange={e => setDateFrom(e.target.value)}
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
+        />
+        <input
+          type="date"
+          aria-label="Au"
+          value={dateTo}
+          onChange={e => setDateTo(e.target.value)}
+          className="rounded-md border-gray-300 bg-white px-3 py-1 text-black shadow-sm"
+        />
         <button
           aria-label="Vue Kanban"
           onClick={() => setView(view === 'grid' ? 'kanban' : 'grid')}
