@@ -30,12 +30,16 @@ import {
   ListTodo,
   AlarmClock,
   Pencil,
-  Trash
+  Trash,
+  CalendarCheck,
+  Euro,
+  UserPlus
 } from 'lucide-react'
 import Link from 'next/link'
 import AddSiteModal from '@/components/AddSiteModal'
 import { useWebsites, Website } from '@/components/WebsitesProvider'
 import Toast from '@/components/Toast'
+import AnnualObjectiveCard from '@/components/AnnualObjectiveCard'
 import { cn } from '@/components/lib/utils'
 
 interface Task {
@@ -176,6 +180,7 @@ export default function DashboardPage() {
           ))}
         </div>
       </section>
+      <h2 className="text-lg font-semibold text-muted-foreground mb-4">Indicateurs clés</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Card aria-label="Projets en cours" className="transition-transform hover:scale-105">
           <CardHeader className="flex items-center justify-between pb-2 space-y-0">
@@ -228,6 +233,35 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+      <section className="mt-4 space-y-4">
+        <h2 className="text-lg font-semibold">Objectifs annuels</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AnnualObjectiveCard
+            title="Mariages réalisés"
+            current={7}
+            total={20}
+            icon={<CalendarCheck className="w-5 h-5 text-primary" />}
+          />
+          <AnnualObjectiveCard
+            title="Chiffre d'affaires généré"
+            current={5200}
+            total={15000}
+            icon={<Euro className="w-5 h-5 text-primary" />}
+          />
+          <AnnualObjectiveCard
+            title="Nouveaux clients"
+            current={12}
+            total={30}
+            icon={<UserPlus className="w-5 h-5 text-primary" />}
+          />
+          <AnnualObjectiveCard
+            title="Projets terminés (hors mariage)"
+            current={22}
+            total={50}
+            icon={<CheckCircle className="w-5 h-5 text-primary" />}
+          />
+        </div>
+      </section>
       <Card>
         <CardHeader>
           <CardTitle>Évolution du chiffre d'affaires</CardTitle>
