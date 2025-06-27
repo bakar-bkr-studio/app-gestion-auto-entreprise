@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export type Status =
   | 'Conception'
@@ -52,78 +53,43 @@ type ProjectsContextType = {
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
 
-const initialProjects: Project[] = [
-  {
-    id: 1,
-    name: 'Mariage Sarah & Tom',
-    client: 'Sarah Martin',
-    description: 'Couverture photo et vidéo du mariage',
-    startDate: '2024-06-10',
-    endDate: '2024-06-15',
-    budget: 1500,
-    status: 'Tournage',
-    type: 'Photo',
-    paymentStatus: 'Acompte',
-    isFavorite: false,
-    tasks: [],
-    notes: '',
-    documents: [],
-  },
-  {
-    id: 2,
-    name: "Clip promo Maison d'hôtes",
-    client: 'Le Beau Gîte',
-    description: "Réalisation d'une vidéo publicitaire",
-    startDate: '2024-05-01',
-    endDate: '2024-05-02',
-    budget: 2000,
-    status: 'Montage',
-    type: 'Video',
-    paymentStatus: 'Non payé',
-    isFavorite: false,
-    tasks: [],
-    notes: '',
-    documents: [],
-  },
-  {
-    id: 3,
-    name: 'Shooting produits Printemps',
-    client: 'Mode & Chic',
-    description: 'Photos catalogue printemps',
-    startDate: '2024-04-20',
-    endDate: '2024-04-22',
-    budget: 800,
-    status: 'Conception',
-    type: 'Photo',
-    paymentStatus: 'Payé',
-    isFavorite: false,
-    tasks: [],
-    notes: '',
-    documents: [],
-  },
-];
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('projects');
-      if (stored) {
-        try {
-          setProjects(JSON.parse(stored) as Project[]);
-        } catch {
-          /* ignore */
-        }
+    const fetchProjects = async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(error.message);
+      } else if (data) {
+        const mapped = data.map((row) => ({
+          id: row.id,
+          name: row.name,
+          client: row.client_name,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          budget: row.budget,
+          status: row.status as Status,
+          type: row.type as ProjectType,
+          paymentStatus: row.payment_status as PaymentStatus,
+          isFavorite: row.is_favorite ?? false,
+          tasks: row.tasks ? JSON.parse(row.tasks) : [],
+          notes: row.personal_notes ?? '',
+          documents: row.attachments_url ? JSON.parse(row.attachments_url) : [],
+        })) as Project[];
+
+        setProjects(mapped);
       }
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('projects', JSON.stringify(projects));
-    }
-  }, [projects]);
+    fetchProjects();
+  }, []);
 
   const addProject = (project: Omit<Project, 'id'>) => {
     const id = projects.length ? Math.max(...projects.map((p) => p.id)) + 1 : 1;
