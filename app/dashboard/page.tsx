@@ -42,7 +42,6 @@ import Toast from '@/components/Toast'
 import AnnualObjectiveCard from '@/components/AnnualObjectiveCard'
 import { cn } from '@/components/lib/utils'
 import TodoList from '@/components/TodoList'
-import NewCalendar from '@/components/NewCalendar'
 
 interface Task {
   id: number
@@ -172,7 +171,6 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 p-6">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
-      <NewCalendar />
       <div className="grid gap-4 sm:grid-cols-2">
         <TodoList storageKey="todo1" defaultTitle="Tâches à effectuer" />
         <TodoList storageKey="todo2" defaultTitle="Idées" />
