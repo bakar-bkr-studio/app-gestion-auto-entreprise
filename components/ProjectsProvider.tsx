@@ -67,22 +67,44 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error(error.message);
       } else if (data) {
-        const mapped = data.map((row) => ({
-          id: row.id,
-          name: row.name,
-          client: row.client_name,
-          description: row.description,
-          startDate: row.start_date,
-          endDate: row.end_date,
-          budget: row.budget,
-          status: row.status as Status,
-          type: row.type as ProjectType,
-          paymentStatus: row.payment_status as PaymentStatus,
-          isFavorite: row.is_favorite ?? false,
-          tasks: row.tasks ? JSON.parse(row.tasks) : [],
-          notes: row.personal_notes ?? '',
-          documents: row.attachments_url ? JSON.parse(row.attachments_url) : [],
-        })) as Project[];
+        const mapped = data.map((row) => {
+          let tasks: Task[] = [];
+          try {
+            tasks =
+              typeof row.tasks === 'string'
+                ? JSON.parse(row.tasks)
+                : (row.tasks as Task[]) || [];
+          } catch (e) {
+            console.error('Error parsing tasks', e);
+          }
+
+          let documents: DocumentFile[] = [];
+          try {
+            documents =
+              typeof row.attachments_url === 'string'
+                ? JSON.parse(row.attachments_url)
+                : (row.attachments_url as DocumentFile[]) || [];
+          } catch (e) {
+            console.error('Error parsing attachments_url', e);
+          }
+
+          return {
+            id: row.id,
+            name: row.name,
+            client: row.client_name,
+            description: row.description,
+            startDate: row.start_date,
+            endDate: row.end_date,
+            budget: row.budget,
+            status: row.status as Status,
+            type: row.type as ProjectType,
+            paymentStatus: row.payment_status as PaymentStatus,
+            isFavorite: row.is_favorite ?? false,
+            tasks,
+            notes: row.personal_notes ?? '',
+            documents,
+          };
+        }) as Project[];
 
         setProjects(mapped);
       }
