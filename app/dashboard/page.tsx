@@ -41,6 +41,8 @@ import { useWebsites, Website } from '@/components/WebsitesProvider'
 import Toast from '@/components/Toast'
 import AnnualObjectiveCard from '@/components/AnnualObjectiveCard'
 import { cn } from '@/components/lib/utils'
+import TodoList from '@/components/TodoList'
+import Agenda from '@/components/Agenda'
 
 interface Task {
   id: number
@@ -51,6 +53,12 @@ interface Task {
   dueDate: string
   priority: 'Urgente' | 'Normale' | 'Faible'
   status: 'En cours' | 'Terminée'
+}
+
+interface Note {
+  id: number
+  title: string
+  createdAt: string
 }
 
 const statusColors: Record<Status, string> = {
@@ -66,6 +74,7 @@ export default function DashboardPage() {
   const { projects, deleteProject } = useProjects()
   const { websites, addWebsite, updateWebsite, deleteWebsite } = useWebsites()
   const [tasks, setTasks] = useState<Task[]>([])
+  const [notes, setNotes] = useState<Note[]>([])
   const [stepFilter, setStepFilter] = useState<Status | 'Tous'>('Tous')
   const [showSiteModal, setShowSiteModal] = useState(false)
   const [editingSite, setEditingSite] = useState<Website | null>(null)
@@ -77,6 +86,19 @@ export default function DashboardPage() {
       if (stored) {
         try {
           setTasks(JSON.parse(stored) as Task[])
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('notes')
+      if (stored) {
+        try {
+          setNotes(JSON.parse(stored) as Note[])
         } catch {
           /* ignore */
         }
@@ -150,6 +172,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 p-6">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TodoList storageKey="todo1" defaultTitle="Tâches à effectuer" />
+        <TodoList storageKey="todo2" defaultTitle="Idées" />
+      </div>
+      <div className="mt-4">
+        <Agenda projects={projects} tasks={tasks} notes={notes} />
+      </div>
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Sites favoris</h2>
