@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useProjects, Task, DocumentFile } from "../../components/ProjectsProvider";
+import { supabase } from "../../lib/supabaseClient";
 import { Client, initialClients } from "../../lib/data/clients";
 import { Input } from "../../components/ui/input";
 import { DateInput } from "../../components/ui/date-input";
@@ -134,8 +135,8 @@ export default function NewProjectPage() {
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
-  const onSubmit = (data: FormValues) => {
-    setLoading(true);
+  const onSubmit = async (data: FormValues) => {
+    setLoading(true)
     const payload = {
       name: data.name,
       client: data.client,
@@ -150,18 +151,46 @@ export default function NewProjectPage() {
       tasks,
       notes: data.notes,
       documents,
-    };
-    if (editId) {
-      updateProject(Number(editId), payload);
-    } else {
-      addProject(payload);
     }
-    setToastType('success');
-    setToast("Projet créé avec succès ✅");
-    setTimeout(() => {
-      setClosing(true);
-    }, 500);
-  };
+
+    try {
+      const { error } = await supabase.from('projects').insert({
+        name: data.name,
+        client_name: data.client,
+        type: data.type,
+        description: data.description,
+        start_date: data.startDate,
+        end_date: data.dueDate,
+        status: data.status,
+        budget: data.budget,
+        payment_status: data.paymentStatus,
+        tasks: JSON.stringify(tasks),
+        personal_notes: data.notes,
+        attachments_url: documents.length ? JSON.stringify(documents) : null,
+      })
+      if (error) throw error
+
+      if (!editId) {
+        addProject(payload)
+      } else {
+        updateProject(Number(editId), payload)
+      }
+
+      setToastType('success')
+      setToast('Projet créé avec succès ✅')
+      reset()
+      setTasks([])
+      setDocuments([])
+      setTimeout(() => {
+        setClosing(true)
+      }, 500)
+    } catch (err: any) {
+      setToastType('error')
+      setToast(`Erreur : ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="p-4">

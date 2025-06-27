@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Input } from './ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import ProjectCard from './ProjectCard';
+import ProjectCard from './DetailedProjectCard';
 import DeleteModal from './DeleteModal';
 import Toast from './Toast';
 import ProjectModal from './ProjectModal';
