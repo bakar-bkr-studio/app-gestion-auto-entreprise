@@ -8,8 +8,8 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { DateInput } from './ui/date-input'
 
-import '@fullcalendar/common/main.min.css'
-import '@fullcalendar/daygrid/main.min.css'
+import '@fullcalendar/common/index.css';
+import '@fullcalendar/daygrid/index.css';
 
 export default function NewCalendar() {
   const [events, setEvents] = useState<EventInput[]>([
