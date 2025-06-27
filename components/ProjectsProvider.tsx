@@ -58,60 +58,65 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error(error.message);
-      } else if (data) {
-        const mapped = data.map((row) => {
-          let tasks: Task[] = [];
-          try {
-            tasks =
-              typeof row.tasks === 'string'
-                ? JSON.parse(row.tasks)
-                : (row.tasks as Task[]) || [];
-          } catch (e) {
-            console.error('Error parsing tasks', e);
-          }
+    console.log('📦 DATA from Supabase:', data);
+    console.error('❌ ERROR from Supabase:', error);
 
-          let documents: DocumentFile[] = [];
-          try {
-            documents =
-              typeof row.attachments_url === 'string'
-                ? JSON.parse(row.attachments_url)
-                : (row.attachments_url as DocumentFile[]) || [];
-          } catch (e) {
-            console.error('Error parsing attachments_url', e);
-          }
+    if (error) {
+      console.error('Error loading projects:', error.message);
+    } else if (data) {
+      const mapped = data.map((row) => {
+        let tasks: Task[] = [];
+        try {
+          tasks =
+            typeof row.tasks === 'string'
+              ? JSON.parse(row.tasks)
+              : (row.tasks as Task[]) || [];
+        } catch (e) {
+          console.error('Error parsing tasks', e);
+        }
 
-          return {
-            id: row.id,
-            name: row.name,
-            client: row.client_name,
-            description: row.description,
-            startDate: row.start_date,
-            endDate: row.end_date,
-            budget: row.budget,
-            status: row.status as Status,
-            type: row.type as ProjectType,
-            paymentStatus: row.payment_status as PaymentStatus,
-            isFavorite: row.is_favorite ?? false,
-            tasks,
-            notes: row.personal_notes ?? '',
-            documents,
-          };
-        }) as Project[];
+        let documents: DocumentFile[] = [];
+        try {
+          documents =
+            typeof row.attachments_url === 'string'
+              ? JSON.parse(row.attachments_url)
+              : (row.attachments_url as DocumentFile[]) || [];
+        } catch (e) {
+          console.error('Error parsing attachments_url', e);
+        }
 
-        setProjects(mapped);
-      }
-    };
+        return {
+          id: row.id,
+          name: row.name,
+          client: row.client_name,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          budget: row.budget,
+          status: row.status as Status,
+          type: row.type as ProjectType,
+          paymentStatus: row.payment_status as PaymentStatus,
+          isFavorite: row.is_favorite ?? false,
+          tasks,
+          notes: row.personal_notes ?? '',
+          documents,
+        };
+      }) as Project[];
 
-    fetchProjects();
-  }, []);
+      console.log('✅ Mapped Projects:', mapped);
+
+      setProjects(mapped);
+    }
+  };
+
+  fetchProjects();
+}, []);
 
   const addProject = (project: Omit<Project, 'id'>) => {
     const id = projects.length ? Math.max(...projects.map((p) => p.id)) + 1 : 1;
