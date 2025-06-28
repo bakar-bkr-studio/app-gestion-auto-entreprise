@@ -1,5 +1,5 @@
 'use client';
-import { Client } from '@/lib/providers/ClientsProvider'
+import { Client } from '@/components/ClientsProvider'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'

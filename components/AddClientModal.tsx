@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Client } from '@/lib/providers/ClientsProvider'
+import { Client } from '@/components/ClientsProvider'
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
