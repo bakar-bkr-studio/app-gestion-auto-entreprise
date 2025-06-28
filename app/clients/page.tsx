@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import AddClientModal from '../../components/AddClientModal'
 import ClientCard from '../../components/ClientCard'
 import Toast from '../../components/Toast'
-import { initialClients, Client } from '../../lib/data/clients'
+import { useClients, Client } from '@/lib/providers/ClientsProvider'
 import { Plus, Search } from 'lucide-react'
 import { Input } from '../../components/ui/input'
 import { Button } from '../../components/ui/button'
@@ -14,45 +14,26 @@ const filterTags = ['Prospect', 'Client', 'mariage', 'client-fidele', 'e-commerc
 const dateFilters = ['Tous', 'Ce mois-ci', '30 derniers jours', 'Depuis le début']
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('clients');
-      if (stored) {
-        try {
-          return JSON.parse(stored) as Client[];
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-    return initialClients;
-  });
+  const { clients, loading, addClient } = useClients();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<string[]>([])
   const [dateFilter, setDateFilter] = useState('Tous')
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('clients', JSON.stringify(clients));
-    }
-  }, [clients]);
-
-  const addClient = (client: Client) => {
-    setClients([...clients, client]);
+  const addClientHandler = async (client: Omit<Client, 'id' | 'created_at'>) => {
+    await addClient(client);
     setToast('Client ajouté avec succès');
   };
 
   const updateClient = (client: Client) => {
-    setClients(clients.map(c => (c.id === client.id ? client : c)));
+    // TODO: mettre à jour le client dans Supabase
     setToast('Client modifié avec succès');
   };
 
   const handleDelete = (id: string) => {
     if (confirm('Supprimer client ?')) {
-      setClients(clients.filter(c => c.id !== id));
+      // TODO: supprimer le client dans Supabase
     }
   };
 
@@ -62,7 +43,7 @@ export default function ClientsPage() {
   };
 
   const filtered = clients.filter(c => {
-    const text = `${c.firstName} ${c.lastName} ${c.company ?? ''}`.toLowerCase()
+    const text = `${c.first_name} ${c.last_name} ${c.company ?? ''}`.toLowerCase()
     const matchSearch = text.includes(search.toLowerCase())
     const matchFilters =
       filters.length === 0 ||
@@ -73,8 +54,7 @@ export default function ClientsPage() {
       )
     const matchDate = (() => {
       if (dateFilter === 'Tous') return true
-      const [day, month, year] = c.dateAdded.split('/')
-      const date = new Date(`${year}-${month}-${day}`)
+      const date = new Date(c.created_at)
       const now = new Date()
       if (dateFilter === 'Ce mois-ci') {
         return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
@@ -173,7 +153,7 @@ export default function ClientsPage() {
       <AddClientModal
         isOpen={showModal}
         client={editingClient ?? undefined}
-        onAdd={addClient}
+        onAdd={addClientHandler}
         onUpdate={updateClient}
         onClose={() => {
           setShowModal(false);

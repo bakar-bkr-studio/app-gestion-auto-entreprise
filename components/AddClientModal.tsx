@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Client } from '../lib/data/clients'
+import { Client } from '@/lib/providers/ClientsProvider'
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -23,7 +23,7 @@ import { cn } from './lib/utils'
 
 interface AddClientModalProps {
   isOpen: boolean;
-  onAdd: (client: Client) => void;
+  onAdd: (client: Omit<Client, 'id' | 'created_at'>) => void;
   onUpdate?: (client: Client) => void;
   onClose: () => void;
   client?: Client;
@@ -47,10 +47,25 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, client }: AddClientModalProps) {
-  const { register, handleSubmit, formState: { errors }, reset, getValues } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    getValues,
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: client
-      ? { ...client, tags: client.tags.join(', ') }
+      ? {
+          firstName: client.first_name,
+          lastName: client.last_name,
+          company: client.company,
+          email: client.email,
+          phone: client.phone,
+          address: client.address,
+          status: client.status as any,
+          tags: client.tags,
+        }
       : { status: 'Client' },
   });
   const tagSuggestions = ['mariage', 'corporate', 'e-commerce', 'client-fidele', 'startup']
@@ -58,7 +73,16 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
 
   useEffect(() => {
     if (client) {
-      reset({ ...client, tags: client.tags.join(', ') });
+      reset({
+        firstName: client.first_name,
+        lastName: client.last_name,
+        company: client.company,
+        email: client.email,
+        phone: client.phone,
+        address: client.address,
+        status: client.status as any,
+        tags: client.tags,
+      })
     } else {
       reset({
         firstName: '',
@@ -69,33 +93,28 @@ export default function AddClientModal({ isOpen, onAdd, onUpdate, onClose, clien
         address: '',
         status: 'Client',
         tags: '',
-      });
+      })
     }
-  }, [client, reset]);
+  }, [client, reset])
 
   const onSubmit = (data: FormValues) => {
     setLoading(true)
-    const now = new Date();
-    const dateAdded = `${now.getDate().toString().padStart(2, '0')}/${
-      (now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
 
-    const newClient: Client = {
-      id: client?.id ?? Date.now().toString(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      company: data.company,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
+    const payload: Omit<Client, 'id' | 'created_at'> = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      company: data.company ?? '',
+      email: data.email ?? '',
+      phone: data.phone ?? '',
+      address: data.address ?? '',
       status: data.status,
-      tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-      dateAdded: client?.dateAdded ?? dateAdded,
-    };
+      tags: data.tags ?? '',
+    }
 
     if (client) {
-      onUpdate?.(newClient);
+      onUpdate?.({ ...client, ...payload })
     } else {
-      onAdd(newClient);
+      onAdd(payload)
     }
 
     reset();

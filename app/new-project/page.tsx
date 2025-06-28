@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useProjects, Task, DocumentFile } from "../../components/ProjectsProvider";
 import { supabase } from "../../lib/supabaseClient";
-import { Client, initialClients } from "../../lib/data/clients";
+import { useClients, Client } from "@/lib/providers/ClientsProvider";
 import { Input } from "../../components/ui/input";
 import { DateInput } from "../../components/ui/date-input";
 import {
@@ -61,20 +61,8 @@ export default function NewProjectPage() {
   const [tasks, setTasks] = useState<Task[]>(project?.tasks ?? []);
   const [taskText, setTaskText] = useState("");
   const [documents, setDocuments] = useState<DocumentFile[]>(project?.documents ?? []);
+  const { clients } = useClients();
   const [manualClient, setManualClient] = useState(project ? false : true);
-  const [clients, setClients] = useState<Client[]>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("clients");
-      if (stored) {
-        try {
-          return JSON.parse(stored) as Client[];
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-    return initialClients;
-  });
 
   const [loading, setLoading] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -236,7 +224,7 @@ export default function NewProjectPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {clients.map((c) => (
-                        <SelectItem key={c.id} value={`${c.firstName} ${c.lastName}`}>{`${c.firstName} ${c.lastName}`}</SelectItem>
+                        <SelectItem key={c.id} value={`${c.first_name} ${c.last_name}`}>{`${c.first_name} ${c.last_name}`}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
