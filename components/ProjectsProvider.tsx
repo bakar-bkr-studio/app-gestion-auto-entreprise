@@ -64,7 +64,6 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('📦 DATA from Supabase:', data);
     console.error('❌ ERROR from Supabase:', error);
 
     if (error) {
@@ -109,7 +108,6 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         };
       }) as Project[];
 
-      console.log('✅ Mapped Projects:', mapped);
 
       setProjects(mapped);
     }

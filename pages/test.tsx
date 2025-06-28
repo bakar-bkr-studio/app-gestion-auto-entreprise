@@ -9,8 +9,6 @@ export default function TestPage() {
       const { data, error } = await supabase.from('projects').select('*')
       if (error) {
         console.error('Error fetching projects:', error)
-      } else {
-        console.log('Projects:', data)
       }
     }
 

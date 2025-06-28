@@ -1,20 +1,19 @@
 "use client";
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash } from "lucide-react";
 import { cn } from "@/components/lib/utils";
-import { useTodos } from "@/providers/todos-provider";
+import { useTodos, Category } from "@/providers/todos-provider";
 
 interface TodoListProps {
-  defaultTitle: string;
+  category: Category;
 }
 
-export default function TodoList({ defaultTitle }: TodoListProps) {
-  const { todos, addTodo, deleteTodo, updateTodo, loading } = useTodos();
-  const [title, setTitle] = useState(defaultTitle);
+export default function TodoList({ category }: TodoListProps) {
+  const { todos, addTodo, deleteTodo, toggleTodo, loading } = useTodos(category);
   const [input, setInput] = useState("");
 
   const handleAdd = () => {
@@ -24,26 +23,19 @@ export default function TodoList({ defaultTitle }: TodoListProps) {
     setInput("");
   };
 
-  const toggle = (id: string, completed: boolean, currentTitle: string) => {
-    updateTodo(id, currentTitle, !completed);
+  const toggle = (id: string) => {
+    toggleTodo(id);
   };
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="font-semibold text-lg"
-        />
-      </CardHeader>
       <CardContent className="space-y-2">
         {loading && <div>Loading...</div>}
         {todos.map((todo) => (
           <div key={todo.id} className="flex items-center space-x-2">
             <Checkbox
               checked={todo.completed}
-              onCheckedChange={() => toggle(todo.id, todo.completed, todo.title)}
+              onCheckedChange={() => toggle(todo.id)}
               id={`cb-${todo.id}`}
             />
             <label
