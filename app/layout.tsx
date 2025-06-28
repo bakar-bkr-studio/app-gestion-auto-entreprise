@@ -24,7 +24,7 @@ import { ReactNode, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 import { WebsitesProvider } from '../components/WebsitesProvider';
-import { ClientsProvider } from '../lib/providers/ClientsProvider';
+import { ClientsProvider } from '@/components/ClientsProvider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -128,11 +128,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </SidebarMenu>
         </Sidebar>
         <ProjectsProvider>
-          <ClientsProvider>
-            <WebsitesProvider>
+          <WebsitesProvider>
+            <ClientsProvider>
               <main className="flex-1">{children}</main>
-            </WebsitesProvider>
-          </ClientsProvider>
+            </ClientsProvider>
+          </WebsitesProvider>
         </ProjectsProvider>
       </body>
     </html>

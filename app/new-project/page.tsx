@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useProjects, Task, DocumentFile } from "../../components/ProjectsProvider";
 import { supabase } from "../../lib/supabaseClient";
-import { useClients, Client } from "@/lib/providers/ClientsProvider";
+import { useClients, Client } from "@/components/ClientsProvider";
 import { Input } from "../../components/ui/input";
 import { DateInput } from "../../components/ui/date-input";
 import {
