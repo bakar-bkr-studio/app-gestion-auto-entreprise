@@ -25,6 +25,7 @@ import { usePathname } from 'next/navigation';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 import { WebsitesProvider } from '../components/WebsitesProvider';
 import { ClientsProvider } from '@/components/ClientsProvider';
+import { TodosProvider } from '@/providers/todos-provider';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -130,7 +131,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ProjectsProvider>
           <WebsitesProvider>
             <ClientsProvider>
-              <main className="flex-1">{children}</main>
+              <TodosProvider>
+                <main className="flex-1">{children}</main>
+              </TodosProvider>
             </ClientsProvider>
           </WebsitesProvider>
         </ProjectsProvider>
