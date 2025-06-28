@@ -41,7 +41,7 @@ import { useWebsites, Website } from '@/components/WebsitesProvider'
 import Toast from '@/components/Toast'
 import AnnualObjectiveCard from '@/components/AnnualObjectiveCard'
 import { cn } from '@/components/lib/utils'
-import TodoList from '@/components/TodoList'
+import TodoList from './_components/todo-list'
 
 interface Task {
   id: number
@@ -172,8 +172,8 @@ export default function DashboardPage() {
     <div className="space-y-8 p-6">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
       <div className="grid gap-4 sm:grid-cols-2">
-        <TodoList storageKey="todo1" defaultTitle="Tâches à effectuer" />
-        <TodoList storageKey="todo2" defaultTitle="Idées" />
+        <TodoList defaultTitle="Tâches à effectuer" />
+        <TodoList defaultTitle="Idées" />
       </div>
       <section className="space-y-2">
         <div className="flex items-center justify-between">
