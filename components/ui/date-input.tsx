@@ -5,19 +5,34 @@ import { Input } from './input'
 
 export interface DateInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(({ className, ...props }, ref) => {
-  return (
-    <div className="relative">
-      <Input
-        ref={ref}
-        type="date"
-        className={cn('pl-8', className)}
-        {...props}
-      />
-      <CalendarIcon className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-    </div>
-  )
-})
+const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
+  ({ className, ...props }, ref) => {
+    const internalRef = React.useRef<HTMLInputElement>(null)
+    React.useImperativeHandle(ref, () => internalRef.current as HTMLInputElement)
+
+    const openPicker = () => {
+      internalRef.current?.showPicker?.()
+    }
+
+    return (
+      <div className="relative">
+        <Input
+          ref={internalRef}
+          type="date"
+          className={cn('pl-8', className)}
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={openPicker}
+          className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white cursor-pointer"
+        >
+          <CalendarIcon className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
+)
 DateInput.displayName = 'DateInput'
 
 export { DateInput }

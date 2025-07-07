@@ -102,17 +102,17 @@ export default function NewProjectPage() {
         description: project.description,
         startDate: project.startDate,
         dueDate: project.endDate,
-        status: project.status as FormValues["status"],
-        type: project.type as FormValues["type"],
+        status: project.status as FormValues['status'],
+        type: project.type as FormValues['type'],
         paymentStatus: project.paymentStatus,
         budget: project.budget,
         notes: project.notes,
-      });
-      setTasks(project.tasks);
-      setDocuments(project.documents);
-      setManualClient(false);
+      })
+      setTasks(project.tasks)
+      setDocuments(project.documents)
+      setManualClient(false)
     }
-  }, [project, reset]);
+  }, [project, reset])
 
   const addTask = () => {
     if (!taskText.trim()) return;
@@ -190,7 +190,15 @@ export default function NewProjectPage() {
         }}
       >
         <Card className="mx-auto max-w-3xl backdrop-blur-md">
-        <CardHeader>
+        <CardHeader className="relative">
+          <button
+            type="button"
+            onClick={() => setClosing(true)}
+            aria-label="Fermer le formulaire"
+            className="absolute left-2 top-2 rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-white"
+          >
+            ✖
+          </button>
           <CardTitle>{editId ? "Modifier le projet" : "Nouveau projet"}</CardTitle>
         </CardHeader>
         <CardContent>
