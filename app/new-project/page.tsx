@@ -95,24 +95,30 @@ export default function NewProjectPage() {
   });
 
   useEffect(() => {
-    if (project) {
+    const current = editId
+      ? projects.find(p => p.id === Number(editId))
+      : duplicateId
+        ? projects.find(p => p.id === Number(duplicateId))
+        : undefined
+
+    if (current) {
       reset({
-        name: project.name,
-        client: project.client,
-        description: project.description,
-        startDate: project.startDate,
-        dueDate: project.endDate,
-        status: project.status as FormValues["status"],
-        type: project.type as FormValues["type"],
-        paymentStatus: project.paymentStatus,
-        budget: project.budget,
-        notes: project.notes,
-      });
-      setTasks(project.tasks);
-      setDocuments(project.documents);
-      setManualClient(false);
+        name: current.name,
+        client: current.client,
+        description: current.description,
+        startDate: current.startDate,
+        dueDate: current.endDate,
+        status: current.status as FormValues['status'],
+        type: current.type as FormValues['type'],
+        paymentStatus: current.paymentStatus,
+        budget: current.budget,
+        notes: current.notes,
+      })
+      setTasks(current.tasks)
+      setDocuments(current.documents)
+      setManualClient(false)
     }
-  }, [project, reset]);
+  }, [editId, duplicateId, projects, reset])
 
   const addTask = () => {
     if (!taskText.trim()) return;
@@ -190,7 +196,15 @@ export default function NewProjectPage() {
         }}
       >
         <Card className="mx-auto max-w-3xl backdrop-blur-md">
-        <CardHeader>
+        <CardHeader className="relative">
+          <button
+            type="button"
+            onClick={() => setClosing(true)}
+            aria-label="Fermer le formulaire"
+            className="absolute left-2 top-2 rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-white"
+          >
+            ✖
+          </button>
           <CardTitle>{editId ? "Modifier le projet" : "Nouveau projet"}</CardTitle>
         </CardHeader>
         <CardContent>
