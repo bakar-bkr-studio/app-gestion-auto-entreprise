@@ -43,7 +43,6 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', userData.user.id)
         .order('created_at', { ascending: false })
         
       if (error) {
