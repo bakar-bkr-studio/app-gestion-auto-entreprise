@@ -33,12 +33,20 @@ export function TodosProvider({ children }: { children: ReactNode }) {
 
   const fetchTodos = async (category: Category) => {
     setLoading(prev => ({ ...prev, [category]: true }))
+    
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) {
+      setLoading(prev => ({ ...prev, [category]: false }))
+      return
+    }
 
     const { data, error: fetchError } = await supabase
       .from('todos')
       .select('*')
       .eq('category', category)
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false })
+      
     if (fetchError) {
       setError(fetchError.message)
     } else if (data) {
@@ -55,12 +63,25 @@ export function TodosProvider({ children }: { children: ReactNode }) {
 
   const addTodo = async (category: Category, title: string) => {
     setLoading(prev => ({ ...prev, [category]: true }))
+    
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) {
+      setError('User not authenticated')
+      setLoading(prev => ({ ...prev, [category]: false }))
+      return
+    }
 
     const { data, error: insertError } = await supabase
       .from('todos')
-      .insert({ title, completed: false, category })
+      .insert({ 
+        title, 
+        completed: false, 
+        category,
+        user_id: userData.user.id
+      })
       .select('*')
       .single()
+      
     if (insertError) {
       setError(insertError.message)
     } else if (data) {
