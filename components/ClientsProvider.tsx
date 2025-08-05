@@ -33,17 +33,10 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true)
-      
-      const { data: userData } = await authClient.auth.getUser()
-      if (!userData?.user) {
-        setLoading(false)
-        return
-      }
 
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', userData.user.id)
         .order('created_at', { ascending: false })
         
       if (error) {
@@ -58,18 +51,9 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addClient = async (client: Omit<Client, 'id' | 'created_at'>) => {
-    const { data: userData } = await authClient.auth.getUser()
-    if (!userData?.user) {
-      console.error('User not authenticated')
-      return
-    }
-
     const { data, error } = await supabase
       .from('clients')
-      .insert({
-        ...client,
-        user_id: userData.user.id
-      })
+      .insert(client)
       .select()
       .single()
       
