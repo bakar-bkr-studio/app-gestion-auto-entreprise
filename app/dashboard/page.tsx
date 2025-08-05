@@ -174,11 +174,9 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <h2 className="text-xl font-bold">Tâches à effectuer</h2>
           <TodoList category="tasks" />
         </div>
         <div>
-          <h2 className="text-xl font-bold mt-6 sm:mt-0">Idées de contenu</h2>
           <TodoList category="ideas" />
         </div>
       </div>
