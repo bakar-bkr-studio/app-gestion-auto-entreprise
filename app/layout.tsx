@@ -1,5 +1,8 @@
 'use client';
 import '../styles/globals.css';
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { createClient } from '@/lib/auth';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -10,6 +13,7 @@ import {
   Users,
   ListTodo,
   FileText,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '../components/lib/utils';
 
@@ -21,19 +25,64 @@ import {
 } from '@/components/ui/sidebar';
 
 import { ReactNode, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 import { WebsitesProvider } from '../components/WebsitesProvider';
 import { ClientsProvider } from '@/components/ClientsProvider';
 import { TodosProvider } from '@/providers/todos-provider';
+import { Button } from '@/components/ui/button';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth');
+  };
+
+  if (loading) {
+    return (
+      <html lang="fr" className="dark">
+        <body className="min-h-screen flex items-center justify-center bg-gray-900">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </body>
+      </html>
+    );
+  }
+
+  if (!user && !pathname?.startsWith('/auth')) {
+    return (
+      <html lang="fr" className="dark">
+        <body className="min-h-screen flex items-center justify-center bg-gray-900">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="fr" className="dark">
       <body className="flex min-h-screen bg-gray-900 text-gray-100 dark:bg-gray-900 dark:text-gray-100">
+        {user && !pathname?.startsWith('/auth') && (
         <Sidebar collapsed={collapsed}>
           <SidebarHeader className="flex items-center justify-between">
             <button
@@ -127,12 +176,30 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </Link>
             </SidebarMenuItem>
           </SidebarMenu>
+          <div className="mt-auto p-4 border-t border-gray-700">
+            <div className="flex items-center justify-between">
+              {!collapsed && (
+                <div className="text-sm text-gray-300 truncate">
+                  {user?.email}
+                </div>
+              )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleSignOut}
+                title="Se déconnecter"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </Sidebar>
+        )}
         <ProjectsProvider>
           <WebsitesProvider>
             <ClientsProvider>
               <TodosProvider>
-                <main className="flex-1">{children}</main>
+                <main className={cn("flex-1", !user && "w-full")}>{children}</main>
               </TodosProvider>
             </ClientsProvider>
           </WebsitesProvider>

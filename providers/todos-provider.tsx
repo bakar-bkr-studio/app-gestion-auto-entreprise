@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/auth'
 
 export type Category = 'tasks' | 'ideas'
 
@@ -28,13 +29,21 @@ export function TodosProvider({ children }: { children: ReactNode }) {
   const [todos, setTodos] = useState<Record<Category, Todo[]>>({ tasks: [], ideas: [] })
   const [loading, setLoading] = useState<Record<Category, boolean>>({ tasks: false, ideas: false })
   const [error, setError] = useState<string | null>(null)
+  const authClient = createClient()
 
   const fetchTodos = async (category: Category) => {
     setLoading(prev => ({ ...prev, [category]: true }))
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) {
+      setLoading(prev => ({ ...prev, [category]: false }))
+      return
+    }
+
     const { data, error: fetchError } = await supabase
       .from('todos')
       .select('*')
       .eq('category', category)
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false })
     if (fetchError) {
       setError(fetchError.message)
@@ -52,10 +61,15 @@ export function TodosProvider({ children }: { children: ReactNode }) {
 
   const addTodo = async (category: Category, title: string) => {
     setLoading(prev => ({ ...prev, [category]: true }))
-    const { data: userData } = await supabase.auth.getUser()
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) {
+      setLoading(prev => ({ ...prev, [category]: false }))
+      return
+    }
+
     const { data, error: insertError } = await supabase
       .from('todos')
-      .insert({ title, completed: false, category, user_id: userData?.user?.id })
+      .insert({ title, completed: false, category, user_id: userData.user.id })
       .select('*')
       .single()
     if (insertError) {

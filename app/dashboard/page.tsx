@@ -42,6 +42,7 @@ import Toast from '@/components/Toast'
 import AnnualObjectiveCard from '@/components/AnnualObjectiveCard'
 import { cn } from '@/components/lib/utils'
 import TodoList from './_components/todo-list'
+import Agenda from '@/components/Agenda'
 
 interface Task {
   id: number
@@ -210,6 +211,10 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
+      </section>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Planning</h2>
+        <Agenda projects={projects} tasks={tasks} notes={notes} />
       </section>
       <h2 className="text-lg font-semibold text-muted-foreground mb-4">Indicateurs clés</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

@@ -1,10 +1,12 @@
 'use client';
+import { useState } from 'react';
 import { Client } from '@/components/ClientsProvider'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { stringToHslColor } from './lib/utils'
+import ClientInteractions from './ClientInteractions'
 
 interface ClientCardProps {
   client: Client;
@@ -15,8 +17,10 @@ interface ClientCardProps {
 export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
   const initials = `${client.first_name.charAt(0)}${client.last_name.charAt(0)}`
   const bg = stringToHslColor(client.first_name + client.last_name)
+  const [showInteractions, setShowInteractions] = useState(false)
 
   return (
+    <>
     <Card className="mx-auto w-full max-w-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
         <div
@@ -73,6 +77,15 @@ export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps
           type="button"
           size="icon"
           variant="ghost"
+          onClick={() => setShowInteractions(true)}
+          aria-label="Interactions"
+        >
+          <MessageSquare className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
           onClick={onEdit}
           aria-label="Modifier"
         >
@@ -89,5 +102,21 @@ export default function ClientCard({ client, onEdit, onDelete }: ClientCardProps
         </Button>
       </CardFooter>
     </Card>
+    {showInteractions && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="w-full max-w-2xl mx-4">
+          <ClientInteractions
+            clientId={client.id}
+            clientName={`${client.first_name} ${client.last_name}`}
+          />
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setShowInteractions(false)}>
+              Fermer
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }

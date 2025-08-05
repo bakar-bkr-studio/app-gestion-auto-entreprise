@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useProjects, Task, DocumentFile } from "../../components/ProjectsProvider";
 import { supabase } from "../../lib/supabaseClient";
+import { createClient } from "@/lib/auth";
 import { useClients, Client } from "@/components/ClientsProvider";
 import { Input } from "../../components/ui/input";
 import { DateInput } from "../../components/ui/date-input";
@@ -30,6 +31,9 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Switch } from "../../components/ui/switch";
 import Toast from "../../components/Toast";
+import TimeTracker from "../../components/TimeTracker";
+import InvoiceGenerator from "../../components/InvoiceGenerator";
+import FileUpload from "../../components/FileUpload";
 
 const formSchema = z.object({
   name: z.string().min(1, "Ce champ est requis"),
@@ -68,6 +72,9 @@ export default function NewProjectPage() {
   const [closing, setClosing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showTimeTracker, setShowTimeTracker] = useState(false);
+  const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
+  const authClient = createClient();
 
   const {
     register,
@@ -148,6 +155,9 @@ export default function NewProjectPage() {
     }
 
     try {
+      const { data: userData } = await authClient.auth.getUser();
+      if (!userData?.user) throw new Error('User not authenticated');
+
       const { error } = await supabase.from('projects').insert({
         name: data.name,
         client_name: data.client,
@@ -161,6 +171,7 @@ export default function NewProjectPage() {
         tasks: JSON.stringify(tasks),
         personal_notes: data.notes,
         attachments_url: documents.length ? JSON.stringify(documents) : null,
+        user_id: userData.user.id,
       })
       if (error) throw error
 
@@ -352,6 +363,43 @@ export default function NewProjectPage() {
                 if (f) setDocuments([...documents, { id: Date.now(), name: f.name, path: f.name }]);
               }} />
             </div>
+          </form>
+        </CardContent>
+          {editId && (
+            <div className="space-y-4 px-6">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTimeTracker(!showTimeTracker)}
+                >
+                  Suivi du temps
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowInvoiceGenerator(true)}
+                >
+                  Générer facture
+                </Button>
+              </div>
+              
+              {showTimeTracker && (
+                <TimeTracker
+                  projectId={editId}
+                  projectName={getValues('name')}
+                />
+              )}
+              
+              <FileUpload
+                projectId={editId}
+                existingFiles={documents.map(d => ({ name: d.name, url: d.path }))}
+                onFileUploaded={(file) => {
+                  setDocuments([...documents, { id: Date.now(), name: file.name, path: file.url }]);
+                }}
+              />
+            </div>
+          )}
             <CardFooter className="flex justify-end gap-2 p-0">
               <Button
                 type="button"
@@ -362,10 +410,20 @@ export default function NewProjectPage() {
               </Button>
               <Button type="submit" disabled={loading}>{loading ? 'Ajout...' : editId ? 'Enregistrer' : 'Créer le projet'}</Button>
             </CardFooter>
-          </form>
-        </CardContent>
       </Card>
       </motion.div>
+      {showInvoiceGenerator && project && (
+        <InvoiceGenerator
+          project={{
+            id: project.id,
+            name: project.name,
+            client: project.client,
+            budget: project.budget,
+            description: project.description
+          }}
+          onClose={() => setShowInvoiceGenerator(false)}
+        />
+      )}
       <Toast
         message={toast}
         onClose={() => setToast(null)}

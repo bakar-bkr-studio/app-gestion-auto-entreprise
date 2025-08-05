@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/auth';
 
 export type Status =
   | 'Conception'
@@ -56,12 +57,17 @@ const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
+  const authClient = createClient();
 
   useEffect(() => {
   const fetchProjects = async () => {
+    const { data: userData } = await authClient.auth.getUser();
+    if (!userData?.user) return;
+
     const { data, error } = await supabase
       .from('projects')
       .select('*')
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false });
 
     if (error) {

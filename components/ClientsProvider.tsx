@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/auth'
 
 export interface Client {
   id: string
@@ -27,11 +28,19 @@ const ClientsContext = createContext<ClientsContextValue | undefined>(undefined)
 export function ClientsProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
+  const authClient = createClient()
 
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true)
+      const { data: userData } = await authClient.auth.getUser()
+      if (!userData?.user) {
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.from('clients').select('*')
+        .eq('user_id', userData.user.id)
       if (error) {
         console.error('Error loading clients:', error)
       } else if (data) {
@@ -44,9 +53,12 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addClient = async (client: Omit<Client, 'id' | 'created_at'>) => {
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) return
+
     const { data, error } = await supabase
       .from('clients')
-      .insert(client)
+      .insert({ ...client, user_id: userData.user.id })
       .select()
       .single()
     if (error) {

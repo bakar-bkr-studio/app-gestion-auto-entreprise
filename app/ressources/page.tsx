@@ -1,6 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { FileText, Globe, Plus, Star } from 'lucide-react';
 import AddSiteModal from '@/components/AddSiteModal'
 import { useWebsites } from '@/components/WebsitesProvider'
@@ -180,78 +185,80 @@ function AddDocumentModal({ onAdd, onClose }: AddDocumentModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow-lg">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Ajouter un document</h3>
-          <button onClick={onClose} aria-label="close" className="text-gray-600 hover:text-black">
-            ✕
-          </button>
-        </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Ajouter un document</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Nom du document</label>
-            <input
+            <Label htmlFor="doc-name">Nom du document</Label>
+            <Input
+              id="doc-name"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Catégorie principale</label>
-            <input
+            <Label htmlFor="doc-category">Catégorie principale</Label>
+            <Input
+              id="doc-category"
               value={category}
               onChange={e => setCategory(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Description</label>
-            <textarea
+            <Label htmlFor="doc-description">Description</Label>
+            <Textarea
+              id="doc-description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               rows={2}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Tags secondaires</label>
-            <input
+            <Label htmlFor="doc-tags">Tags secondaires</Label>
+            <Input
+              id="doc-tags"
               value={tags}
               onChange={e => setTags(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               placeholder="mariage, corporate"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Date</label>
-            <input
+            <Label htmlFor="doc-date">Date</Label>
+            <Input
+              id="doc-date"
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Chemin local du fichier</label>
-            <input
+            <Label htmlFor="doc-path">Chemin local du fichier</Label>
+            <Input
+              id="doc-path"
               value={path}
               onChange={e => setPath(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
             />
           </div>
-          <label className="flex items-center space-x-2 text-sm">
-            <input type="checkbox" checked={priority} onChange={e => setPriority(e.target.checked)} />
-            <span>Document prioritaire</span>
-          </label>
+          <div className="flex items-center space-x-2">
+            <input 
+              type="checkbox" 
+              id="doc-priority"
+              checked={priority} 
+              onChange={e => setPriority(e.target.checked)} 
+            />
+            <Label htmlFor="doc-priority">Document prioritaire</Label>
+          </div>
         </div>
-        <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
-          <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
-        </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={submit}>Ajouter</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

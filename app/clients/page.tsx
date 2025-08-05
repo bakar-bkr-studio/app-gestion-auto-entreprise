@@ -21,6 +21,9 @@ export default function ClientsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
   const addClientHandler = async (client: Omit<Client, 'id' | 'created_at'>) => {
     await addClient(client);
     setToast('Client ajouté avec succès');
@@ -67,6 +70,13 @@ export default function ClientsPage() {
     })()
     return matchSearch && matchFilters && matchDate
   })
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedClients = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="p-4">
@@ -138,7 +148,7 @@ export default function ClientsPage() {
         ))}
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.map(client => (
+        {paginatedClients.map(client => (
           <ClientCard
             key={client.id}
             client={client}
@@ -147,8 +157,29 @@ export default function ClientsPage() {
           />
         ))}
       </div>
-      {filtered.length === 0 && (
+      {paginatedClients.length === 0 && (
         <p className="mt-4 text-center text-gray-500">Aucun client pour le moment</p>
+      )}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            Précédent
+          </button>
+          <span className="px-3 py-1">
+            Page {currentPage} sur {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded border disabled:opacity-50"
+          >
+            Suivant
+          </button>
+        </div>
       )}
       <AddClientModal
         isOpen={showModal}

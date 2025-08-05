@@ -8,6 +8,7 @@ import DeleteModal from './DeleteModal';
 import Toast from './Toast';
 import ProjectModal from './ProjectModal';
 import { useProjects, Status, Project, PaymentStatus } from './ProjectsProvider';
+import { useState as useReactState } from 'react';
 
 const statusColors: Record<Status, string> = {
   Conception: 'bg-yellow-200 text-yellow-700',
@@ -34,6 +35,8 @@ export default function ProjectList() {
   const [toast, setToast] = useState<string | null>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const clientOptions = Array.from(new Set(projects.map(p => p.client)));
+  const [currentPage, setCurrentPage] = useReactState(1);
+  const itemsPerPage = 12;
 
   const handleEdit = (id: number) => router.push(`/new-project?id=${id}`);
 
@@ -66,6 +69,13 @@ export default function ProjectList() {
   });
 
   const ordered = sorted;
+  
+  // Pagination
+  const totalPages = Math.ceil(ordered.length / itemsPerPage);
+  const paginatedProjects = ordered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const renderCards = (list: Project[], compact = false) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -204,7 +214,34 @@ export default function ProjectList() {
           Tous
         </button>
       </div>
-      {view === 'grid' ? renderCards(ordered) : renderKanban()}
+      {view === 'grid' ? (
+        <>
+          {renderCards(paginatedProjects)}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded border disabled:opacity-50"
+              >
+                Précédent
+              </button>
+              <span className="px-3 py-1">
+                Page {currentPage} sur {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded border disabled:opacity-50"
+              >
+                Suivant
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        renderKanban()
+      )}
       <DeleteModal isOpen={deleteId !== null} onCancel={() => setDeleteId(null)} onConfirm={confirmDelete}>
         Voulez-vous vraiment supprimer ce projet ?
       </DeleteModal>

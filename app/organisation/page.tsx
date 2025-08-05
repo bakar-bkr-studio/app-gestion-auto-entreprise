@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useProjects } from '../../components/ProjectsProvider';
 import Toast from '../../components/Toast';
-import { Plus, X, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 
 interface Task {
@@ -15,6 +21,9 @@ interface Task {
   dueDate: string;
   priority: 'Urgente' | 'Normale' | 'Faible';
   status: 'En cours' | 'Terminée';
+  isRecurring?: boolean;
+  recurrencePattern?: 'daily' | 'weekly' | 'monthly';
+  recurrenceInterval?: number;
 }
 
 interface Note {
@@ -248,7 +257,10 @@ export default function OrganisationPage() {
       )}
 
       {showNoteModal && (
-        <NoteModal onAdd={addNote} onClose={() => setShowNoteModal(false)} />
+        <NoteModal 
+          onAdd={addNote} 
+          onClose={() => setShowNoteModal(false)} 
+        />
       )}
 
       <Toast message={toast} onClose={() => setToast(null)} />
@@ -268,85 +280,137 @@ function TaskModal({ projects, onAdd, onClose }: TaskModalProps) {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<'Urgente' | 'Normale' | 'Faible'>('Normale');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
 
   const submit = () => {
     if (!title) return;
-    onAdd({ title, project: project || undefined, description, dueDate, priority });
+    onAdd({ 
+      title, 
+      project: project || undefined, 
+      description, 
+      dueDate, 
+      priority,
+      isRecurring,
+      recurrencePattern: isRecurring ? recurrencePattern : undefined,
+      recurrenceInterval: isRecurring ? recurrenceInterval : undefined
+    });
     onClose();
     setTitle('');
     setProject('');
     setDescription('');
     setDueDate('');
     setPriority('Normale');
+    setIsRecurring(false);
   };
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Ajouter une tâche</h3>
-          <button onClick={onClose}><X size={20} /></button>
-        </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Ajouter une tâche</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Titre</label>
-            <input
+            <Label htmlFor="title">Titre</Label>
+            <Input
+              id="title"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Description</label>
-            <textarea
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               rows={3}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Projet lié</label>
-            <select
+            <Label htmlFor="project">Projet lié</Label>
+            <Select
               value={project}
-              onChange={e => setProject(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
+              onValueChange={setProject}
             >
-              <option value="">Aucun</option>
-              {projects.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Aucun" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Aucun</SelectItem>
+                {projects.map(p => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-wrap gap-2">
             {(['Faible', 'Normale', 'Urgente'] as const).map(p => (
-              <button
+              <Button
                 key={p}
                 type="button"
+                variant={priority === p ? "default" : "outline"}
+                size="sm"
                 onClick={() => setPriority(p)}
-                className={`rounded px-3 py-1 text-sm ${priority === p ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'}`}
               >
                 {p}
-              </button>
+              </Button>
             ))}
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Date d'échéance</label>
-            <input
+            <Label htmlFor="due-date">Date d'échéance</Label>
+            <Input
+              id="due-date"
               type="date"
               value={dueDate}
               onChange={e => setDueDate(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
             />
           </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="recurring"
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+            />
+            <Label htmlFor="recurring">Tâche récurrente</Label>
+          </div>
+          {isRecurring && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="pattern">Fréquence</Label>
+                <Select value={recurrencePattern} onValueChange={(value: any) => setRecurrencePattern(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Quotidien</SelectItem>
+                    <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                    <SelectItem value="monthly">Mensuel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="interval">Intervalle</Label>
+                <Input
+                  id="interval"
+                  type="number"
+                  min="1"
+                  value={recurrenceInterval}
+                  onChange={e => setRecurrenceInterval(parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
-          <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
-        </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={submit}>Ajouter</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -371,46 +435,45 @@ function NoteModal({ onAdd, onClose }: NoteModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Ajouter une note</h3>
-          <button onClick={onClose}><X size={20} /></button>
-        </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Ajouter une note</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Titre</label>
-            <input
+            <Label htmlFor="note-title">Titre</Label>
+            <Input
+              id="note-title"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Description</label>
-            <textarea
+            <Label htmlFor="note-text">Description</Label>
+            <Textarea
+              id="note-text"
               value={text}
               onChange={e => setText(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
               rows={4}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-black">Tags (séparés par des virgules)</label>
-            <input
+            <Label htmlFor="note-tags">Tags (séparés par des virgules)</Label>
+            <Input
+              id="note-tags"
               value={tags}
               onChange={e => setTags(e.target.value)}
-              className="w-full rounded border bg-white px-3 py-2 text-black"
             />
           </div>
         </div>
-        <div className="flex justify-end space-x-2 pt-2">
-          <button onClick={onClose} className="rounded border bg-gray-100 px-4 py-1 text-black hover:bg-gray-200">Annuler</button>
-          <button onClick={submit} className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800">Ajouter</button>
-        </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={submit}>Ajouter</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
