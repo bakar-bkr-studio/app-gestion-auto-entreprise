@@ -75,6 +75,7 @@ export default function AuthPage() {
 
   const [passwordStrength, setPasswordStrength] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -175,8 +176,7 @@ export default function AuthPage() {
       setToastType('error')
       setToast(error.message)
     } else {
-      setToastType('success')
-      setToast('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.')
+      setShowConfirmation(true)
     }
     setLoading(false)
   }
@@ -210,6 +210,78 @@ export default function AuthPage() {
     if (passwordStrength < 50) return 'Faible'
     if (passwordStrength < 75) return 'Moyen'
     return 'Fort'
+  }
+
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <Mail className="h-8 w-8 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Vérifiez votre email</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              Nous avons envoyé un lien de confirmation à :
+            </p>
+            <p className="font-semibold text-primary">
+              {registrationData.email}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Cliquez sur le lien dans l'email pour activer votre compte et commencer à utiliser BKR STUDIO APP.
+            </p>
+            <div className="rounded-lg bg-muted/50 p-4">
+              <p className="text-sm">
+                <strong>Vous ne voyez pas l'email ?</strong>
+              </p>
+              <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                <li>• Vérifiez votre dossier spam/courrier indésirable</li>
+                <li>• L'email peut prendre quelques minutes à arriver</li>
+                <li>• Assurez-vous que l'adresse email est correcte</li>
+              </ul>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmation(false)
+                setRegistrationStep(1)
+                setRegistrationData({
+                  email: '',
+                  password: '',
+                  confirmPassword: '',
+                  firstName: '',
+                  lastName: '',
+                  businessName: '',
+                  specialization: [],
+                  experience: '',
+                  location: '',
+                  phone: '',
+                  website: '',
+                  communicationPrefs: [],
+                  marketingConsent: false,
+                  termsAccepted: false,
+                  privacyAccepted: false
+                })
+              }}
+              className="w-full"
+            >
+              Créer un autre compte
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTab('signin')}
+              className="w-full"
+            >
+              Retour à la connexion
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
   }
 
   return (
