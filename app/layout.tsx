@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
-import { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 import { ProjectsProvider } from '../components/ProjectsProvider';
 import { WebsitesProvider } from '../components/WebsitesProvider';
 import { ClientsProvider } from '@/components/ClientsProvider';
