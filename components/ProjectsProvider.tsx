@@ -61,9 +61,15 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
   const fetchProjects = async () => {
+    const { data: userData } = await authClient.auth.getUser()
+    if (!userData?.user) {
+      return
+    }
+
     const { data, error } = await supabase
       .from('projects')
       .select('*')
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false });
 
     if (error) {

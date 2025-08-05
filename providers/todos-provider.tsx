@@ -45,6 +45,7 @@ export function TodosProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('category', category)
       .eq('user_id', userData.user.id)
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false })
       
     if (fetchError) {
