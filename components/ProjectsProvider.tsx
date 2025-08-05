@@ -64,8 +64,6 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    console.error('❌ ERROR from Supabase:', error);
-
     if (error) {
       console.error('Error loading projects:', error.message);
     } else if (data) {
